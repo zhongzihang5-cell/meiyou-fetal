@@ -13,17 +13,17 @@ export function StatusBar() {
   )
 }
 
-export function BottomNav({ active = 'home' }) {
+export function BottomNav({ active = 'home', currentTab, onTabChange }) {
   return (
     <div className="bottom-nav">
-      <div className={`bot-item ${active === 'home' ? 'active' : ''}`}>
+      <div className={`bot-item ${active === 'home' ? 'active' : ''}`} onClick={() => onTabChange?.('mama')}>
         <div className="bot-icon"><IconHome active={active === 'home'} /></div>
         美柚
       </div>
       <div className={`bot-item ${active === 'record' ? 'active' : ''}`}>
         <div className="bot-icon" style={{ position: 'relative' }}>
           <IconCalendar active={active === 'record'} />
-          {active === 'record' && <div className="badge">8</div>}
+          <div className="bot-badge">8</div>
         </div>
         记录
       </div>
@@ -38,7 +38,7 @@ export function BottomNav({ active = 'home' }) {
       <div className="bot-item">
         <div className="bot-icon" style={{ position: 'relative' }}>
           <IconMessage active={false} />
-          <div className="badge" style={{ background: 'var(--pink)' }}>2</div>
+          <div className="bot-badge">2</div>
         </div>
         消息
       </div>

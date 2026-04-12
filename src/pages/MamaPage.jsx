@@ -15,6 +15,7 @@ export default function MamaPage({ onTabChange }) {
         <div className="top-nav-tabs">
           <div className="nav-tab active">妈妈</div>
           <div className="nav-tab" onClick={() => onTabChange('fetal')}>胎宝宝</div>
+          <div className="nav-tab" onClick={() => onTabChange('baby')}>嬷嬷</div>
           <div className="nav-tab" onClick={() => onTabChange('baby')}>呢呢</div>
         </div>
         <div style={{ padding: '0 6px' }}>
@@ -160,7 +161,7 @@ export default function MamaPage({ onTabChange }) {
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#F0E8FC', flexShrink: 0 }} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 500 }}>♂ ____北风</div>
-                <div style={{ fontSize: 11, color: '#AAA' }}>呢呢 · 产后第1天</div>
+                <div style={{ fontSize: 11, color: '#AAA' }}>嬷嬷 · 产后第1天</div>
               </div>
               <div style={{ marginLeft: 'auto', color: '#AAA' }}>···</div>
             </div>

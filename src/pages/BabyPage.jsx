@@ -1,189 +1,317 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
+import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO } from '../data/timeline.js'
+
+const MILESTONE_EMOJIS = { 1: '🌱', 8: '💓', 12: '📋', 16: '🤲', 22: '🔬', 28: '📸', 36: '⏰' }
+
+// ── 出生卡片 ──
+function BirthCard() {
+  const b = BIRTH_INFO
+  return (
+    <div style={{ background: '#fff', borderRadius: 18, border: '0.5px solid #EBEBEB', overflow: 'hidden', marginBottom: 14 }}>
+      <div style={{ background: 'linear-gradient(135deg, #FFE4E8, #FFC8D0)', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ width: 50, height: 50, background: 'rgba(255,255,255,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 26 }}>👶</div>
+        <div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#C04070' }}>小小的你，大大的爱</div>
+          <div style={{ fontSize: 12, color: '#C06080', marginTop: 2 }}>★ {b.zodiac} &nbsp; {b.lunar}</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', padding: '14px 0 10px' }}>
+        {[{ val: b.height, unit: 'cm', label: '身高' }, { val: b.weight, unit: 'kg', label: '体重' }, { val: b.head, unit: 'cm', label: '头围' }].map((s, i) => (
+          <div key={s.label} style={{ flex: 1, textAlign: 'center', borderLeft: i > 0 ? '0.5px solid #F2F2F2' : 'none' }}>
+            <div><span style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A' }}>{s.val}</span><span style={{ fontSize: 12, color: '#AAA', marginLeft: 2 }}>{s.unit}</span></div>
+            <div style={{ fontSize: 11, color: '#AAA', marginTop: 4 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ padding: '0 14px 12px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {[b.date, '身高体重', '出生记录'].map(t => (
+          <div key={t} style={{ fontSize: 11, background: '#F5F5F7', color: '#666', borderRadius: 8, padding: '4px 10px' }}>{t}</div>
+        ))}
+      </div>
+      <div style={{ padding: '10px 14px', borderTop: '0.5px solid #F2F2F2', display: 'flex', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 12, color: '#AAA' }}>妈妈</span>
+        <div style={{ display: 'flex', gap: 14 }}>
+          <span style={{ fontSize: 12, color: '#AAA', cursor: 'pointer' }}>❤️ 赞</span>
+          <span style={{ fontSize: 12, color: '#AAA', cursor: 'pointer' }}>💬 评论</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 出生后普通照片卡 ──
+function BabyPhotoCard({ entry }) {
+  return (
+    <div style={{ background: '#fff', borderRadius: 18, border: '0.5px solid #EBEBEB', overflow: 'hidden', marginBottom: 14 }}>
+      <div style={{ height: entry.isToday ? 200 : 160, background: entry.color || '#D8E8E0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width="50" height="50" viewBox="0 0 50 50" fill="none" opacity="0.28">
+          <circle cx="25" cy="18" r="14" fill="#fff"/>
+          <ellipse cx="25" cy="42" rx="20" ry="14" fill="#fff"/>
+        </svg>
+      </div>
+      <div style={{ padding: '12px 14px' }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', marginBottom: 3 }}>{entry.title}</div>
+        {entry.note && <div style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>{entry.note}</div>}
+        <div style={{ fontSize: 11, color: '#AAA' }}>{entry.ageLabel}</div>
+      </div>
+      <div style={{ padding: '10px 14px', borderTop: '0.5px solid #F2F2F2', display: 'flex', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 12, color: '#AAA' }}>{entry.author}</span>
+        <div style={{ display: 'flex', gap: 14 }}>
+          <span style={{ fontSize: 12, color: '#AAA', cursor: 'pointer' }}>❤️ 赞</span>
+          <span style={{ fontSize: 12, color: '#AAA', cursor: 'pointer' }}>💬 评论</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 出生后里程碑卡 ──
+function BabyMilestoneCard({ entry }) {
+  return (
+    <div style={{ background: '#fff', borderRadius: 14, border: '0.5px solid #FFD0A0', padding: '12px 14px', marginBottom: 12, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+      <div style={{ width: 40, height: 40, background: '#FFF3E0', borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>{entry.emoji}</div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#B06000', marginBottom: 3 }}>{entry.title}</div>
+        {entry.note && <div style={{ fontSize: 12, color: '#888', lineHeight: 1.5 }}>{entry.note}</div>}
+        <div style={{ fontSize: 11, color: '#AAA', marginTop: 4 }}>{entry.ageLabel} · {entry.author}</div>
+      </div>
+    </div>
+  )
+}
+
+// ── 出生前胎宝宝数据卡（精简版，用于柚柚时间轴中展示） ──
+function FetalDataCardSmall({ entry }) {
+  const isWeight = entry.subtype === 'weight_estimate'
+  const isMovement = entry.subtype === 'fetal_movement'
+  const isHeartRate = entry.subtype === 'heart_rate'
+  const isPhoto = entry.type === 'photo'
+  const isMilestone = entry.type === 'milestone'
+
+  const tagColor = isWeight ? { bg: '#FBEAF0', text: '#E8608A' }
+    : isMovement ? { bg: '#E2F5EE', text: '#1BA97A' }
+    : isHeartRate ? { bg: '#E8F2FC', text: '#3A8DDD' }
+    : { bg: '#F0EDFB', text: '#8A6FD8' }
+
+  const tagLabel = isWeight ? '胎儿估重' : isMovement ? '胎动记录' : isHeartRate ? '胎心记录'
+    : isMilestone ? '里程碑' : entry.title
+
+  return (
+    <div style={{ background: '#fff', borderRadius: 14, border: '0.5px solid #EBEBEB', padding: '10px 14px', marginBottom: 10, opacity: 0.9 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {isMilestone && <span style={{ fontSize: 16 }}>{MILESTONE_EMOJIS[entry.week] || '🌸'}</span>}
+          <span style={{ fontSize: 11, fontWeight: 600, color: tagColor.text, background: tagColor.bg, borderRadius: 6, padding: '2px 8px' }}>{tagLabel}</span>
+        </div>
+        <span style={{ fontSize: 11, color: '#CCC' }}>孕{entry.week}周</span>
+      </div>
+
+      {isWeight && entry.data && (
+        <div style={{ display: 'flex', gap: 12 }}>
+          {[{ k: 'weight', u: 'g', l: '体重' }, { k: 'head', u: 'mm', l: '头围' }, { k: 'belly', u: 'mm', l: '腹围' }]
+            .filter(f => entry.data[f.k])
+            .map(f => (
+              <div key={f.k} style={{ textAlign: 'center' }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{entry.data[f.k]}</span>
+                <span style={{ fontSize: 10, color: '#AAA', marginLeft: 2 }}>{f.u}</span>
+                <div style={{ fontSize: 10, color: '#AAA' }}>{f.l}</div>
+              </div>
+            ))}
+        </div>
+      )}
+
+      {isMovement && entry.data && (
+        <div style={{ display: 'flex', gap: 16 }}>
+          <div><span style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{entry.data.count}</span><span style={{ fontSize: 10, color: '#AAA', marginLeft: 2 }}>次</span></div>
+          <div><span style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{entry.data.duration}</span><span style={{ fontSize: 10, color: '#AAA', marginLeft: 2 }}>分钟</span></div>
+        </div>
+      )}
+
+      {isHeartRate && entry.data && (
+        <div><span style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{entry.data.bpm}</span><span style={{ fontSize: 10, color: '#AAA', marginLeft: 2 }}>次/分钟</span></div>
+      )}
+
+      {isPhoto && (
+        <div style={{ height: 60, background: entry.color || '#E8E8E8', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 11, color: '#BBB' }}>{entry.title}</span>
+        </div>
+      )}
+
+      {isMilestone && entry.note && (
+        <div style={{ fontSize: 12, color: '#888' }}>{entry.note}</div>
+      )}
+
+      {isMilestone && !entry.note && (
+        <div style={{ fontSize: 12, color: '#BBB' }}>{entry.title}</div>
+      )}
+    </div>
+  )
+}
+
+function TlDot({ muted, small }) {
+  const size = small ? 8 : 10
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%', flexShrink: 0,
+      background: muted ? '#CCC' : '#E8608A',
+      boxShadow: muted ? 'none' : `0 0 0 ${small ? 2 : 3}px rgba(232,96,138,0.18)`,
+    }} />
+  )
+}
 
 export default function BabyPage({ onTabChange }) {
+  const b = BIRTH_INFO
+  // Public fetal entries (not private)
+  const fetalPublic = INITIAL_TIMELINE.filter(e => !e.isPrivate)
+  // Group fetal entries by date for display
+  const fetalGroups = {}
+  fetalPublic.forEach(e => {
+    if (!fetalGroups[e.date]) fetalGroups[e.date] = []
+    fetalGroups[e.date].push(e)
+  })
+  const fetalDates = Object.entries(fetalGroups).sort((a, b) => b[0].localeCompare(a[0]))
+
   return (
     <div className="phone-shell" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <StatusBar />
 
+      {/* Top nav */}
       <div className="top-nav">
         <div style={{ padding: '0 6px', display: 'flex', alignItems: 'center' }}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="9" cy="9" r="7" stroke="#555" strokeWidth="1.6"/>
-            <path d="M14.5 14.5L18 18" stroke="#555" strokeWidth="1.6" strokeLinecap="round"/>
-          </svg>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="7" stroke="#555" strokeWidth="1.6"/><path d="M14.5 14.5L18 18" stroke="#555" strokeWidth="1.6" strokeLinecap="round"/></svg>
         </div>
         <div className="top-nav-tabs">
           <div className="nav-tab" onClick={() => onTabChange('mama')}>妈妈</div>
           <div className="nav-tab" onClick={() => onTabChange('fetal')}>胎宝宝</div>
-          <div className="nav-tab active">呢呢</div>
+          <div className="nav-tab active">柚柚</div>
         </div>
         <div style={{ padding: '0 6px' }}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <rect x="3" y="3" width="14" height="14" rx="3" stroke="#555" strokeWidth="1.6" fill="none"/>
-            <path d="M7 10h6M10 7v6" stroke="#555" strokeWidth="1.4" strokeLinecap="round"/>
-          </svg>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#555" strokeWidth="1.6" fill="none"/><path d="M7 10h6M10 7v6" stroke="#555" strokeWidth="1.4" strokeLinecap="round"/></svg>
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div className="scroll-area" style={{ flex: 1 }}>
+
         {/* Hero */}
-        <div style={{ height: 200, position: 'relative', background: 'linear-gradient(160deg, #B8D0C8, #D4ECD0, #E8F5E8)', overflow: 'hidden' }}>
+        <div style={{ height: 200, position: 'relative', background: 'linear-gradient(160deg, #B8D0C8, #D4ECD0)', overflow: 'hidden' }}>
           <svg width="100%" height="200" viewBox="0 0 390 200" preserveAspectRatio="xMidYMid slice" style={{ position: 'absolute', inset: 0 }}>
-            <ellipse cx="195" cy="100" rx="60" ry="70" fill="#D4E8E0" opacity="0.6"/>
-            <ellipse cx="195" cy="80" rx="35" ry="38" fill="#EAF4F0" opacity="0.7"/>
-            <ellipse cx="195" cy="155" rx="50" ry="35" fill="#D4E8E0" opacity="0.5"/>
+            <ellipse cx="195" cy="100" rx="60" ry="70" fill="#D4E8E0" opacity="0.5"/>
+            <ellipse cx="195" cy="80" rx="38" ry="40" fill="#EAF4F0" opacity="0.6"/>
+            <ellipse cx="195" cy="155" rx="52" ry="36" fill="#D4E8E0" opacity="0.4"/>
           </svg>
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            padding: '14px 16px',
-            background: 'linear-gradient(transparent, rgba(0,0,0,0.28))',
-          }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>呢呢</div>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '14px 16px', background: 'linear-gradient(transparent, rgba(0,0,0,0.26))' }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{b.name}</div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', marginTop: 2 }}>2 岁 6 天</div>
           </div>
-          <div style={{
-            position: 'absolute', top: 14, right: 14,
-            display: 'flex', alignItems: 'center', gap: 5,
-            background: 'rgba(255,255,255,0.92)',
-            borderRadius: 20, padding: '6px 12px',
-            fontSize: 12, fontWeight: 500, color: 'var(--pink)',
-            cursor: 'pointer',
-          }}>邀请亲友</div>
-        </div>
-
-        {/* Today change */}
-        <div style={{
-          background: 'linear-gradient(135deg, #FFB347, #FF8C42)',
-          margin: '10px 12px', borderRadius: 18,
-          padding: '14px 16px', color: '#fff',
-        }}>
-          <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 5, fontWeight: 500 }}>宝宝今日变化</div>
-          <div style={{ fontSize: 13, lineHeight: 1.6, fontWeight: 500 }}>
-            我已经能用勺和碗了，可以开始锻炼我使用筷子了，使用筷子会牵动200多块肌肉，对我而言是一项锻炼呢。›
+          <div style={{ position: 'absolute', top: 14, right: 14, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.92)', borderRadius: 20, padding: '6px 12px', fontSize: 12, fontWeight: 500, color: '#E8608A', cursor: 'pointer' }}>
+            邀请亲友
           </div>
         </div>
 
-        {/* Kong */}
-        <div style={{ background: '#fff', marginTop: 8, padding: '14px 14px 10px' }}>
+        {/* Today change card */}
+        <div style={{ background: 'linear-gradient(135deg, #FFB347, #FF8C42)', margin: '10px 12px', borderRadius: 18, padding: '14px 16px', color: '#fff' }}>
+          <div style={{ fontSize: 11, opacity: 0.85, marginBottom: 5, fontWeight: 500 }}>宝宝今日变化</div>
+          <div style={{ fontSize: 13, lineHeight: 1.6, fontWeight: 500 }}>我已经能用勺和碗了，可以开始锻炼我使用筷子了，使用筷子会牵动200多块肌肉，对我而言是一项锻炼呢。›</div>
+        </div>
+
+        {/* Kong zone */}
+        <div style={{ background: '#fff', marginTop: 8, padding: '14px 14px 12px' }}>
           <div className="kong-grid">
-            {['喂养记录', '云相册', '发育测评', '记身高体重', '更多 ∨'].map(k => (
-              <div key={k} className="kong-item">
-                <div className="kong-icon-wrap" style={{ background: '#F5F5F7' }}>
-                  <div style={{ width: 26, height: 26, background: 'rgba(0,0,0,0.08)', borderRadius: 6 }} />
+            {[
+              { label: '喂养记录', bg: '#FBEAF0' },
+              { label: '云相册', bg: '#E8F2FC' },
+              { label: '发育测评', bg: '#E8F4E8', vip: true },
+              { label: '记身高体重', bg: '#E2F5EE' },
+              { label: '更多 ∨', bg: '#F5F5F7' },
+            ].map(k => (
+              <div key={k.label} className="kong-item">
+                <div className="kong-icon" style={{ background: k.bg, position: 'relative' }}>
+                  {k.vip && <div className="kong-vip">VIP</div>}
+                  <div style={{ width: 26, height: 26, background: 'rgba(0,0,0,0.07)', borderRadius: 6 }} />
                 </div>
-                <div className="kong-label">{k}</div>
+                <div className="kong-lbl">{k.label}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Cloud banner */}
-        <div style={{
-          background: '#fff', margin: '8px 12px',
-          borderRadius: 14, border: '0.5px solid #EBEBEB',
-          padding: '12px 14px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
+        <div style={{ background: '#fff', margin: '8px 12px', borderRadius: 14, border: '0.5px solid #EBEBEB', padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 13, color: '#666' }}>宝宝的珍贵回忆永久保存 →</span>
-          <div style={{
-            fontSize: 12, background: '#FBEAF0', color: 'var(--pink)',
-            borderRadius: 14, padding: '5px 12px',
-            fontWeight: 500, border: '1px solid #F4C0D1',
-            cursor: 'pointer',
-          }}>一键开启</div>
+          <div style={{ fontSize: 12, background: '#FBEAF0', color: '#E8608A', borderRadius: 14, padding: '5px 12px', fontWeight: 500, border: '1px solid #F4C0D1', cursor: 'pointer' }}>一键开启</div>
         </div>
 
-        {/* Timeline */}
-        <div className="timeline">
-          <div className="tl-date-row">
-            <div className="tl-dot" />
-            <div className="tl-date-label">今天</div>
-            <div className="tl-week-label">2 岁 6 天</div>
-          </div>
+        {/* ── 时间轴 ── */}
+        <div style={{ background: '#F5F5F7', padding: '14px 16px 40px' }}>
 
-          {/* Daily prompt card */}
-          <div style={{
-            background: '#fff', borderRadius: 18,
-            border: '1px solid #F4C0D1', padding: 16,
-            marginBottom: 14, display: 'flex', gap: 12, alignItems: 'center',
-          }}>
-            <div style={{ width: 56, height: 56, background: '#FBEAF0', borderRadius: 14, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🧸</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#C04070', marginBottom: 4 }}>宝宝给娃娃盖被子呢</div>
-              <div style={{ fontSize: 12, color: '#B06080' }}>喂饭打针像大人～</div>
-              <div style={{ marginTop: 8, display: 'inline-block', background: 'var(--pink)', color: '#fff', borderRadius: 16, padding: '5px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>立即保存</div>
-            </div>
-          </div>
-
-          <div className="tl-date-row" style={{ marginTop: 4 }}>
-            <div className="tl-dot" />
-            <div className="tl-date-label">2025 年 5 月 26 日</div>
-            <div className="tl-week-label">1 岁 1 个月 23 天</div>
-          </div>
-
-          {/* Photo card */}
-          <div style={{ background: '#fff', borderRadius: 18, border: '0.5px solid #EBEBEB', overflow: 'hidden', marginBottom: 14 }}>
-            <div style={{ height: 200, background: 'linear-gradient(135deg, #B8D8D0, #90C0B8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="60" height="60" viewBox="0 0 60 60" fill="none" opacity="0.35">
-                <circle cx="30" cy="24" r="14" fill="#fff"/>
-                <ellipse cx="30" cy="50" rx="22" ry="16" fill="#fff"/>
-              </svg>
-            </div>
-            <div style={{ padding: '12px 14px' }}>
-              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>在海边玩耍</div>
-              <div style={{ fontSize: 12, color: '#AAA' }}>2025 年 5 月 26 日 · 1 岁 1 个月 23 天</div>
-            </div>
-            <div style={{ padding: '10px 14px', borderTop: '0.5px solid #F2F2F2', display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12, color: '#AAA' }}>妈妈 刚刚</span>
-              <div style={{ display: 'flex', gap: 16 }}>
-                <span style={{ fontSize: 12, color: '#AAA' }}>❤️ 赞</span>
-                <span style={{ fontSize: 12, color: '#AAA' }}>💬 评论</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="tl-date-row">
-            <div className="tl-dot muted" />
-            <div className="tl-date-label">2024 年 4 月 9 日</div>
-            <div className="tl-week-label">出生日</div>
-          </div>
-
-          {/* Birth card */}
-          <div style={{ background: '#fff', borderRadius: 18, border: '0.5px solid #EBEBEB', overflow: 'hidden', marginBottom: 14 }}>
-            <div style={{ background: 'linear-gradient(135deg, #FFE4E8, #FFC8D0)', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 48, height: 48, background: 'rgba(255,255,255,0.6)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 24 }}>👶</div>
-              <div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#C04070' }}>小小的你，大大的爱</div>
-                <div style={{ fontSize: 12, color: '#C06080', marginTop: 2 }}>★ 白羊座 &nbsp; 农历 二月廿二</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', padding: '14px 0 10px' }}>
-              {[{ val: '50', unit: 'cm', label: '身高' }, { val: '3.2', unit: 'kg', label: '体重' }, { val: '34', unit: 'cm', label: '头围' }].map((s, i) => (
-                <div key={s.label} style={{ flex: 1, textAlign: 'center', borderLeft: i > 0 ? '0.5px solid #F2F2F2' : 'none' }}>
-                  <div><span style={{ fontSize: 24, fontWeight: 700 }}>{s.val}</span><span style={{ fontSize: 12, color: '#AAA' }}> {s.unit}</span></div>
-                  <div style={{ fontSize: 11, color: '#AAA', marginTop: 4 }}>{s.label}</div>
+          {/* 出生后记录 */}
+          {BABY_TIMELINE_AFTER.map((entry, idx) => {
+            const isFirst = idx === 0
+            return (
+              <div key={entry.id}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, marginTop: isFirst ? 0 : 4 }}>
+                  <TlDot />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>{isFirst ? '今天' : entry.date}</span>
+                  <span style={{ fontSize: 12, color: '#AAA' }}>{entry.ageLabel}</span>
                 </div>
-              ))}
-            </div>
-            <div style={{ padding: '0 14px 12px', display: 'flex', gap: 6 }}>
-              {['2024年4月9日', '身高体重', '出生记录'].map(t => (
-                <div key={t} style={{ fontSize: 11, background: '#F5F5F7', color: '#666', borderRadius: 8, padding: '4px 10px' }}>{t}</div>
-              ))}
-            </div>
-            <div style={{ padding: '10px 14px', borderTop: '0.5px solid #F2F2F2', display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12, color: '#AAA' }}>妈妈 刚刚</span>
-              <div style={{ display: 'flex', gap: 16 }}>
-                <span style={{ fontSize: 12, color: '#AAA' }}>❤️ 赞</span>
-                <span style={{ fontSize: 12, color: '#AAA' }}>💬 评论</span>
+                {entry.type === 'milestone'
+                  ? <BabyMilestoneCard entry={entry} />
+                  : <BabyPhotoCard entry={entry} />
+                }
               </div>
-            </div>
-          </div>
-        </div>
+            )
+          })}
 
-        <div style={{ height: 20 }} />
+          {/* ── 出生节点 ── */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, marginTop: 4 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#F4C0D1', flexShrink: 0, boxShadow: '0 0 0 3px rgba(244,192,209,0.3)' }} />
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>{b.date}</span>
+            <span style={{ fontSize: 12, color: '#AAA' }}>出生日</span>
+          </div>
+          <BirthCard />
+
+          {/* ── 分割线：出生前数据 ── */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '8px 0 18px' }}>
+            <div style={{ flex: 1, height: '0.5px', background: '#DDD' }} />
+            <span style={{ fontSize: 11, color: '#AAA', whiteSpace: 'nowrap' }}>以下为出生前记录</span>
+            <span style={{ fontSize: 11, color: '#E8608A', cursor: 'pointer', whiteSpace: 'nowrap' }}>仅妈妈可见 · 设置</span>
+            <div style={{ flex: 1, height: '0.5px', background: '#DDD' }} />
+          </div>
+
+          {/* 胎宝宝历史记录（精简版卡片） */}
+          {fetalDates.map(([date, entries]) => {
+            const first = entries[0]
+            const d = new Date(date)
+            const dateLabel = `${d.getMonth() + 1} 月 ${d.getDate()} 日`
+            const wLabel = first.day > 0 ? `孕 ${first.week} 周 ${first.day} 天` : `孕 ${first.week} 周`
+            return (
+              <div key={date} style={{ opacity: 0.75 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <TlDot muted small />
+                  <span style={{ fontSize: 13, fontWeight: 500, color: '#AAA' }}>{dateLabel}</span>
+                  <span style={{ fontSize: 11, color: '#CCC' }}>{wLabel}</span>
+                </div>
+                {entries.map(e => <FetalDataCardSmall key={e.id} entry={e} />)}
+              </div>
+            )
+          })}
+
+          <div style={{ height: 40 }} />
+        </div>
       </div>
 
-      <BottomNav active="home" />
+      {/* FAB */}
+      <div style={{ position: 'absolute', bottom: 86, right: 16, zIndex: 50 }}>
+        <button className="fab">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="6" width="20" height="15" rx="3" stroke="#fff" strokeWidth="1.6"/>
+            <circle cx="12" cy="13.5" r="4" stroke="#fff" strokeWidth="1.6"/>
+            <path d="M8.5 6l1.8-2.5h3.4L15.5 6" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/>
+            <circle cx="17.5" cy="9.5" r="1.2" fill="#fff"/>
+          </svg>
+        </button>
+      </div>
+
+      <BottomNav active="home" onTabChange={onTabChange} />
     </div>
   )
 }
