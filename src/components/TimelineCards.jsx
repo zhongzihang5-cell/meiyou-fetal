@@ -127,7 +127,7 @@ export function FetalMovementCard({ entry }) {
           fontSize: 12, fontWeight: 600, color: '#1BA97A',
           background: '#E2F5EE', borderRadius: 8, padding: '3px 9px',
         }}>
-          胎动记录
+          数胎动
         </span>
         <span style={{ fontSize: 12, color: '#AAA' }}>{entry.date} · {data?.session || ''}次</span>
       </div>
@@ -208,34 +208,45 @@ export function PhotoCard({ entry }) {
 }
 
 export function MilestoneCompletedCard({ entry }) {
+  const heroBg = entry.color || '#DDC8D8'
   return (
     <div style={{
       background: '#fff',
       borderRadius: 16,
-      border: '0.5px solid #F4C0D1',
-      padding: '12px 14px',
+      border: '0.5px solid #EBEBEB',
+      overflow: 'hidden',
       marginBottom: 12,
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: 10,
     }}>
       <div style={{
-        width: 36, height: 36,
-        background: '#FBEAF0',
-        borderRadius: 10,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 20, flexShrink: 0,
+        height: 110,
+        background: entry.imageUrl
+          ? `#E8E8E8 url(${entry.imageUrl}) center/cover no-repeat`
+          : heroBg,
+        position: 'relative',
       }}>
-        {entry.emoji || '🌸'}
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#C04070', marginBottom: 3 }}>{entry.title}</div>
-        {entry.note && (
-          <div style={{ fontSize: 12, color: '#888', lineHeight: 1.5 }}>{entry.note}</div>
-        )}
-        <div style={{ fontSize: 11, color: '#AAA', marginTop: 4 }}>
-          {formatPregnancyWeekDay(entry.week, entry.day)} · {entry.author}
+        <div style={{
+          position: 'absolute',
+          bottom: 8,
+          left: 12,
+          background: '#fff',
+          borderRadius: 20,
+          padding: '4px 11px',
+          fontSize: 10,
+          color: '#607090',
+          fontWeight: 500,
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        }}>
+          {formatPregnancyWeekDay(entry.week, entry.day)} · 大事记
         </div>
+      </div>
+      {entry.title && (
+        <div style={{ padding: '10px 14px 0', fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>{entry.title}</div>
+      )}
+      {entry.note && (
+        <div style={{ padding: entry.title ? '6px 14px 8px' : '10px 14px 8px', fontSize: 12, color: '#888', lineHeight: 1.5 }}>{entry.note}</div>
+      )}
+      <div style={{ fontSize: 11, color: '#AAA', padding: '0 14px 12px' }}>
+        {entry.author}
       </div>
     </div>
   )

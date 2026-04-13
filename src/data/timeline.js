@@ -7,8 +7,8 @@ export function formatPregnancyWeekDay(week, day) {
 
 export const MILESTONES = {
   1:  { title: '记录第一次发现宝宝存在', sub: '验孕棒、早早孕试纸，留下这珍贵的一刻', emoji: '🌱' },
-  8:  { title: '第一次听到心跳', sub: '拍下 B 超单，留住这个珍贵瞬间', emoji: '💓' },
-  12: { title: 'NT 检查', sub: '留下第一张正式的 B 超照', emoji: '📋' },
+  8:  { title: '第一次听到心跳', sub: '拍下产检报告，留住这个珍贵瞬间', emoji: '💓' },
+  12: { title: 'NT 检查', sub: '留下第一张正式的产检影像', emoji: '📋' },
   16: { title: '第一次感受到胎动', sub: '记录下来，这一刻无比珍贵', emoji: '🤲' },
   22: { title: '四维彩超', sub: '看看宝宝长什么样', emoji: '🔬' },
   28: { title: '孕 28 周，拍一张大肚照吧', sub: '进入孕晚期，留下最美的孕肚时光', emoji: '📸' },
@@ -36,7 +36,6 @@ export const INITIAL_TIMELINE = [
     week: 29, day: 1,
     title: '胎儿估重',
     data: { weight: 1120, head: 248, belly: 220, femur: 42 },
-    note: '产检一切正常，医生说发育很好',
     author: '妈妈',
     time: '13:33',
   },
@@ -46,8 +45,7 @@ export const INITIAL_TIMELINE = [
     subtype: 'ultrasound',
     date: daysAgo(12),   // 4月1日
     week: 29, day: 1,
-    title: 'B 超单',
-    note: '孕 29 周产检，看到小家伙在动',
+    title: '产检报告',
     author: '妈妈',
     color: '#C8D8E8',
     time: '15:20',
@@ -71,7 +69,7 @@ export const INITIAL_TIMELINE = [
     subtype: 'fetal_movement',
     date: daysAgo(18),
     week: 27, day: 4,
-    title: '胎动记录',
+    title: '数胎动',
     data: { count: 12, duration: 60, session: '晚' },
     author: '妈妈',
     time: '21:10',
@@ -82,9 +80,8 @@ export const INITIAL_TIMELINE = [
     subtype: 'heart_rate',
     date: daysAgo(21),
     week: 27, day: 1,
-    title: '胎心记录',
+    title: '测胎心',
     data: { bpm: 152 },
-    note: '宝宝心跳很有力',
     author: '妈妈',
     time: '09:30',
   },
@@ -112,6 +109,7 @@ export const INITIAL_TIMELINE = [
     note: '168次/分钟，好快！眼泪都出来了',
     author: '妈妈',
     time: '10:05',
+    color: '#D8C4D4',
   },
   {
     id: 'e-007',
@@ -123,6 +121,7 @@ export const INITIAL_TIMELINE = [
     note: '两条线，手都在抖！',
     author: '妈妈',
     time: '08:12',
+    color: '#DDC8D8',
   },
 ]
 

@@ -20,7 +20,7 @@ const UPLOAD_TYPES = [
   },
   {
     id: 'ultrasound',
-    label: 'B 超单',
+    label: '产检报告',
     sub: '上传产检照片',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -45,7 +45,7 @@ const UPLOAD_TYPES = [
   },
   {
     id: 'fetal_movement',
-    label: '胎动记录',
+    label: '数胎动',
     sub: '数胎动结果',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
