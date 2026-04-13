@@ -2,7 +2,9 @@ import { useState, useMemo } from 'react'
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import UploadModal from '../components/UploadModal.jsx'
 import { IconCamera, IconFetalAvatar } from '../components/Icons.jsx'
-import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY, DAYS_UNTIL_DUE } from '../data/timeline.js'
+import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY } from '../data/timeline.js'
+import { DEFAULT_PREGNANCY_PROGRESS } from '../data/pregnancyProgress.js'
+import PregnancyWeekDotsCard from '../components/PregnancyWeekDotsCard.jsx'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
@@ -58,7 +60,7 @@ function mergeWeekGroupsWithPlaceholders(weekGroups, placeholders) {
   return [...map.values()].sort((a, b) => b.week - a.week)
 }
 
-const MILESTONE_EMOJIS = {1:'🌱',8:'💓',12:'📋',16:'🤲',22:'🔬',28:'📸',29:'📸',36:'⏰'}
+const MILESTONE_EMOJIS = {1:'🌱',8:'💓',12:'📋',16:'🤲',22:'🔬',28:'📸',29:'📸',30:'📸',36:'⏰'}
 
 function CardFoot({ tag, tagColor, tagBg, entry }) {
   const t = entry.time ? ` ${entry.time}` : ''
@@ -291,8 +293,6 @@ export default function FetalPage({ onTabChange }) {
     [weekGroups],
   )
 
-  const pct = Math.round((CURRENT_WEEK * 7 + CURRENT_DAY) / (40 * 7) * 100)
-
   const sortedTodayEntries = useMemo(() => {
     return [...todayEntries].sort((a, b) => {
       const bellyRank = e => (e.type === 'photo' && e.subtype === 'belly' ? 1 : 0)
@@ -366,28 +366,36 @@ export default function FetalPage({ onTabChange }) {
               </div>
             </div>
           </div>
-          <div style={{ background: '#fff', padding: '12px 16px 14px' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
-              <div style={{ fontSize: 13, color: '#1A1A1A' }}>
-                <span style={{ color: '#E07080', fontWeight: 600 }}>第 {CURRENT_WEEK} 周</span>
-                <span style={{ color: '#AAA' }}> · 还有 {DAYS_UNTIL_DUE} 天</span>
-              </div>
-              <div style={{ fontSize: 11, color: '#C0A8A0' }}>孕程 {pct}%</div>
-            </div>
-            <div style={{ height: 4, background: '#F0EAEA', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg,#E890A0,#C86090)', borderRadius: 3 }} />
-            </div>
-          </div>
         </div>
+
+        <PregnancyWeekDotsCard
+          data={{
+            currentWeek: CURRENT_WEEK,
+            recordedWeeks: DEFAULT_PREGNANCY_PROGRESS.recordedWeeks,
+          }}
+        />
 
         {/* Timeline */}
         <div style={{background:'#F5F5F7',padding:'14px 12px 100px'}}>
 
           {/* Today */}
-          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
-            <TlDot/>
-            <span style={{fontSize:14,fontWeight:600,color:'#1A1A1A'}}>今天</span>
-            <span style={{fontSize:12,color:'#AAA'}}>孕 {CURRENT_WEEK} 周 {CURRENT_DAY} 天</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <TlDot />
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', flexShrink: 0 }}>今天</span>
+            <span style={{
+              fontSize: 11,
+              color: '#B0A0A0',
+              fontWeight: 500,
+              whiteSpace: 'nowrap',
+              letterSpacing: '0.03em',
+              flexShrink: 0,
+            }}>
+              孕 {CURRENT_WEEK} 周 {CURRENT_DAY} 天
+            </span>
+            <div style={{ flex: 1, minWidth: 8, height: '0.5px', background: '#DDD8D4' }} />
+            <div style={{ fontSize: 11, color: '#C8B4B0', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              {getWeekSize(CURRENT_WEEK)}
+            </div>
           </div>
 
           <AiFourDInTimelineCard />

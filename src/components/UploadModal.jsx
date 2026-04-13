@@ -76,7 +76,7 @@ export default function UploadModal({ onClose, onSubmit }) {
       type: selected === 'belly' || selected === 'ultrasound' ? 'photo' : 'data',
       subtype: selected,
       date: new Date().toISOString().split('T')[0],
-      week: 29,
+      week: 30,
       day: 1,
       title: type.label,
       note,

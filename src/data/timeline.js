@@ -6,6 +6,7 @@ export const MILESTONES = {
   22: { title: '四维彩超', sub: '看看宝宝长什么样', emoji: '🔬' },
   28: { title: '孕 28 周，拍一张大肚照吧', sub: '进入孕晚期，留下最美的孕肚时光', emoji: '📸' },
   29: { title: '孕 29 周，拍一张大肚照吧', sub: '进入孕晚期，留下最美的孕肚时光', emoji: '📸' },
+  30: { title: '孕 30 周，拍一张大肚照吧', sub: '进入孕晚期，留下最美的孕肚时光', emoji: '📸' },
   36: { title: '待产倒计时', sub: '记录最后的孕肚时光，宝宝快来了', emoji: '⏰' },
 }
 
@@ -168,6 +169,6 @@ export const BIRTH_INFO = {
   lunar: '农历 二月廿二',
 }
 
-export const CURRENT_WEEK = 29
+export const CURRENT_WEEK = 30
 export const CURRENT_DAY = 1
-export const DAYS_UNTIL_DUE = 76
+export const DAYS_UNTIL_DUE = 69

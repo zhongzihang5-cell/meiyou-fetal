@@ -1,7 +1,7 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO } from '../data/timeline.js'
 
-const MILESTONE_EMOJIS = { 1: '🌱', 8: '💓', 12: '📋', 16: '🤲', 22: '🔬', 28: '📸', 29: '📸', 36: '⏰' }
+const MILESTONE_EMOJIS = { 1: '🌱', 8: '💓', 12: '📋', 16: '🤲', 22: '🔬', 28: '📸', 29: '📸', 30: '📸', 36: '⏰' }
 
 const TODAY_STR = new Date().toISOString().split('T')[0]
 
