@@ -1,8 +1,6 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO, formatPregnancyWeekDay } from '../data/timeline.js'
 
-const MILESTONE_EMOJIS = { 1: '🌱', 8: '💓', 12: '📋', 16: '🤲', 22: '🔬', 28: '📸', 29: '📸', 30: '📸', 36: '⏰' }
-
 const TODAY_STR = new Date().toISOString().split('T')[0]
 
 function formatEntryDate(dateStr) {
@@ -130,22 +128,19 @@ function FetalDataCardSmall({ entry }) {
   let footColor = '#8A6FD8'
   let footBg = '#F0EDFB'
   if (isWeight) { footTag = '胎儿估重'; footColor = '#E05070'; footBg = '#FFE8EE' }
-  else if (isMovement) { footTag = '胎动记录'; footColor = '#308878'; footBg = '#E0F4F0' }
-  else if (isHeartRate) { footTag = '胎心记录'; footColor = '#185FA5'; footBg = '#E6F1FB' }
-  else if (isPhoto) { footTag = isBelly ? '大肚照' : 'B 超单'; footColor = isBelly ? '#508040' : '#308878'; footBg = isBelly ? '#E8F4E0' : '#E0F4F0' }
-  else if (isMilestone) { footTag = '里程碑'; footColor = '#D04060'; footBg = '#FFE0E8' }
-
-  const count = entry.data?.count || 0
-  const movementSentiment = count >= 10 ? '宝宝今天很活跃，像在开派对 🥳' : count >= 5 ? '宝宝在动哦，跟你打招呼呢 👋' : '宝宝今天比较安静，在睡觉 💤'
-  const bpm = entry.data?.bpm || 0
-  const heartSentiment = bpm > 160 ? '心跳很有力，咚咚咚 ❤️' : bpm > 140 ? '心跳规律，一切都好 💓' : '宝宝在安静地发育中 🌙'
+  else if (isMovement) { footTag = '数胎动'; footColor = '#308878'; footBg = '#E0F4F0' }
+  else if (isHeartRate) { footTag = '测胎心'; footColor = '#185FA5'; footBg = '#E6F1FB' }
+  else if (isPhoto) { footTag = isBelly ? '大肚照' : '产检报告'; footColor = isBelly ? '#508040' : '#308878'; footBg = isBelly ? '#E8F4E0' : '#E0F4F0' }
+  else if (isMilestone) { footTag = '大事记'; footColor = '#D04060'; footBg = '#FFE0E8' }
 
   return (
     <div style={{ background: '#fff', borderRadius: 14, border: '0.5px solid #EBEBEB', marginBottom: 10, opacity: 0.9, overflow: 'hidden' }}>
       <div style={{ padding: '10px 14px 0' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-          <span style={{ fontSize: 11, color: '#CCC' }}>{formatPregnancyWeekDay(entry.week, entry.day)}</span>
-        </div>
+        {!isMilestone && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+            <span style={{ fontSize: 11, color: '#CCC' }}>{formatPregnancyWeekDay(entry.week, entry.day)}</span>
+          </div>
+        )}
 
         {isWeight && entry.data && (
           <div style={{ display: 'flex', gap: 12, paddingBottom: 4 }}>
@@ -165,33 +160,27 @@ function FetalDataCardSmall({ entry }) {
         )}
 
         {isMovement && entry.data && (
-          <>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-              <div style={{ flex: 1, textAlign: 'center', borderRight: '0.5px solid #F2F2F2', paddingRight: 12, marginRight: 4 }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>{entry.data.count}</div>
-                <div style={{ fontSize: 10, color: '#AAA' }}>次</div>
-                <div style={{ fontSize: 10, color: '#AAA', marginTop: 2 }}>胎动次数</div>
-              </div>
-              <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>{entry.data.duration}</div>
-                <div style={{ fontSize: 10, color: '#AAA' }}>分钟</div>
-                <div style={{ fontSize: 10, color: '#AAA', marginTop: 2 }}>计数时长</div>
-              </div>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, textAlign: 'center', borderRight: '0.5px solid #F2F2F2', paddingRight: 12, marginRight: 4 }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>{entry.data.count}</div>
+              <div style={{ fontSize: 10, color: '#AAA' }}>次</div>
+              <div style={{ fontSize: 10, color: '#AAA', marginTop: 2 }}>胎动次数</div>
             </div>
-            <div style={{ marginTop: 8, marginBottom: 4, fontSize: 12, color: '#C08898', fontStyle: 'italic' }}>{movementSentiment}</div>
-          </>
+            <div style={{ flex: 1, textAlign: 'center' }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>{entry.data.duration}</div>
+              <div style={{ fontSize: 10, color: '#AAA' }}>分钟</div>
+              <div style={{ fontSize: 10, color: '#AAA', marginTop: 2 }}>计数时长</div>
+            </div>
+          </div>
         )}
 
         {isHeartRate && entry.data && (
-          <>
-            <div style={{ textAlign: 'center', paddingBottom: 4 }}>
-              <div style={{ fontSize: 28, fontWeight: 700, color: '#1A1A1A', letterSpacing: -0.5 }}>{entry.data.bpm}</div>
-              <div style={{ fontSize: 10, color: '#AAA' }}>次 / 分钟</div>
-              <div style={{ fontSize: 10, color: '#AAA', marginTop: 2 }}>胎心率</div>
-            </div>
-            <div style={{ marginTop: 4, marginBottom: 4, fontSize: 12, color: '#6090A8', fontStyle: 'italic' }}>{heartSentiment}</div>
-            {entry.note && <div style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>{entry.note}</div>}
-          </>
+          <div style={{ textAlign: 'center', paddingBottom: 4 }}>
+            <div style={{ fontSize: 28, fontWeight: 700, color: '#1A1A1A', letterSpacing: -0.5 }}>{entry.data.bpm}</div>
+            <div style={{ fontSize: 10, color: '#AAA' }}>次 / 分钟</div>
+            <div style={{ fontSize: 10, color: '#AAA', marginTop: 2 }}>胎心率</div>
+            {entry.note && <div style={{ fontSize: 12, color: '#888', marginTop: 8, marginBottom: 4 }}>{entry.note}</div>}
+          </div>
         )}
 
         {isPhoto && (
@@ -201,13 +190,39 @@ function FetalDataCardSmall({ entry }) {
         )}
 
         {isMilestone && (
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', paddingBottom: 4 }}>
-            <span style={{ fontSize: 20, lineHeight: 1.2 }}>{MILESTONE_EMOJIS[entry.week] || '🌸'}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#2A1020', marginBottom: 4 }}>{entry.title}</div>
-              {entry.note && <div style={{ fontSize: 12, color: '#9A8090', lineHeight: 1.6 }}>{entry.note}</div>}
+          <>
+            <div
+              style={{
+                position: 'relative',
+                height: 58,
+                borderRadius: 8,
+                overflow: 'hidden',
+                marginBottom: 8,
+                background: entry.imageUrl
+                  ? `#E8E8E8 url(${entry.imageUrl}) center/cover no-repeat`
+                  : (entry.color || '#DDC8D8'),
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 5,
+                  left: 8,
+                  background: '#fff',
+                  borderRadius: 12,
+                  padding: '2px 8px',
+                  fontSize: 9,
+                  color: '#607090',
+                  fontWeight: 500,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                }}
+              >
+                {formatPregnancyWeekDay(entry.week, entry.day)} · 大事记
+              </div>
             </div>
-          </div>
+            {entry.title && <div style={{ fontSize: 13, fontWeight: 700, color: '#2A1020', marginBottom: 3 }}>{entry.title}</div>}
+            {entry.note && <div style={{ fontSize: 11, color: '#9A8090', lineHeight: 1.55 }}>{entry.note}</div>}
+          </>
         )}
       </div>
       <FetalPreCardFoot tag={footTag} tagColor={footColor} tagBg={footBg} entry={entry} />

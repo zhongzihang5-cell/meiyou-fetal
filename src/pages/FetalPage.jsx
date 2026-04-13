@@ -3,8 +3,6 @@ import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import UploadModal from '../components/UploadModal.jsx'
 import { IconCamera, IconFetalAvatar } from '../components/Icons.jsx'
 import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY, formatPregnancyWeekDay } from '../data/timeline.js'
-import { DEFAULT_PREGNANCY_PROGRESS } from '../data/pregnancyProgress.js'
-import PregnancyWeekDotsCard from '../components/PregnancyWeekDotsCard.jsx'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
@@ -32,32 +30,6 @@ function groupByWeekThenDate(entries) {
       week: Number(week),
       dates: Object.entries(dateMap).sort((a, b) => b[0].localeCompare(a[0]))
     }))
-}
-
-const WEEK_SIZES = {
-  1:'宝宝像芝麻 🌱',4:'宝宝像蓝莓 🫐',8:'宝宝像花生 🥜',
-  10:'宝宝像草莓 🍓',
-  12:'宝宝像李子 🍑',16:'宝宝像鳄梨 🥑',20:'宝宝像香蕉 🍌',
-  22:'宝宝像木瓜 🧡',24:'宝宝像玉米 🌽',26:'宝宝像黄瓜 🥒',
-  27:'宝宝像花椰菜 🥦',28:'宝宝像茄子 🍆',30:'宝宝像椰菜 🥬',
-  32:'宝宝像南瓜 🎃',36:'宝宝像哈密瓜 🍈',40:'宝宝像西瓜 🍉',
-}
-function getWeekSize(week) {
-  const keys = Object.keys(WEEK_SIZES).map(Number).sort((a,b)=>a-b)
-  let label = WEEK_SIZES[keys[0]]
-  for (const k of keys) { if (week >= k) label = WEEK_SIZES[k] }
-  return label
-}
-
-/** 无数据也要展示的孕周（空状态卡片） */
-const EMPTY_WEEK_ROWS = [10]
-
-function mergeWeekGroupsWithPlaceholders(weekGroups, placeholders) {
-  const map = new Map(weekGroups.map(g => [g.week, { ...g }]))
-  for (const w of placeholders) {
-    if (!map.has(w)) map.set(w, { week: w, dates: [] })
-  }
-  return [...map.values()].sort((a, b) => b.week - a.week)
 }
 
 const MILESTONE_EMOJIS = {1:'🌱',8:'💓',12:'📋',16:'🤲',22:'🔬',28:'📸',29:'📸',30:'📸',36:'⏰'}
@@ -130,8 +102,6 @@ function WeightEstimateCard({ entry }) {
 
 function FetalMovementCard({ entry }) {
   const { data } = entry
-  const count = data?.count || 0
-  const sentiment = count>=10?'宝宝今天很活跃，像在开派对 🥳':count>=5?'宝宝在动哦，跟你打招呼呢 👋':'宝宝今天比较安静，在睡觉 💤'
   return (
     <div style={{background:'#fff',borderRadius:16,border:'0.5px solid #EBEBEB',marginBottom:12,overflow:'hidden'}}>
       <div style={{padding:'13px 14px 0'}}>
@@ -147,16 +117,14 @@ function FetalMovementCard({ entry }) {
             <div style={{fontSize:10,color:'#AAA',marginTop:2}}>计数时长</div>
           </div>
         </div>
-        <div style={{marginTop:8,fontSize:12,color:'#C08898',fontStyle:'italic'}}>{sentiment}</div>
       </div>
-      <CardFoot tag="胎动记录" tagColor="#308878" tagBg="#E0F4F0" entry={entry} />
+      <CardFoot tag="数胎动" tagColor="#308878" tagBg="#E0F4F0" entry={entry} />
     </div>
   )
 }
 
 function HeartRateCard({ entry }) {
   const bpm = entry.data?.bpm || 0
-  const sentiment = bpm>160?'心跳很有力，咚咚咚 ❤️':bpm>140?'心跳规律，一切都好 💓':'宝宝在安静地发育中 🌙'
   return (
     <div style={{background:'#fff',borderRadius:16,border:'0.5px solid #EBEBEB',marginBottom:12,overflow:'hidden'}}>
       <div style={{padding:'13px 14px 0'}}>
@@ -165,26 +133,54 @@ function HeartRateCard({ entry }) {
           <div style={{fontSize:11,color:'#AAA'}}>次 / 分钟</div>
           <div style={{fontSize:11,color:'#AAA',marginTop:2}}>胎心率</div>
         </div>
-        <div style={{marginTop:8,fontSize:12,color:'#6090A8',fontStyle:'italic'}}>{sentiment}</div>
         {entry.note && <div style={{marginTop:6,fontSize:12,color:'#888'}}>{entry.note}</div>}
       </div>
-      <CardFoot tag="胎心记录" tagColor="#185FA5" tagBg="#E6F1FB" entry={entry} />
+      <CardFoot tag="测胎心" tagColor="#185FA5" tagBg="#E6F1FB" entry={entry} />
     </div>
   )
 }
 
 function PhotoCard({ entry }) {
   const isBelly = entry.subtype === 'belly'
-  const tag = isBelly ? '大肚照' : 'B 超单'
+  const tag = isBelly ? '大肚照' : '产检报告'
   const tagColor = isBelly ? '#508040' : '#308878'
   const tagBg = isBelly ? '#E8F4E0' : '#E0F4F0'
   return (
     <div style={{background:'#fff',borderRadius:16,border:'0.5px solid #EBEBEB',overflow:'hidden',marginBottom:12}}>
-      <div style={{height:130,background:entry.color||'#E8E8E8',display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" opacity="0.3">
-          {isBelly?(<><ellipse cx="20" cy="18" rx="10" ry="12" fill="#fff"/><ellipse cx="20" cy="32" rx="14" ry="10" fill="#fff"/></>):(<><rect x="4" y="6" width="32" height="26" rx="3" fill="#fff"/><path d="M8 24 L13 18 L18 22 L24 14 L32 20" stroke="#DDD" strokeWidth="2" fill="none" strokeLinecap="round"/></>)}
-        </svg>
-        <div style={{position:'absolute',bottom:8,left:12,background:'rgba(255,255,255,0.78)',borderRadius:10,padding:'2px 9px',fontSize:10,color:'#607090'}}>
+      <div
+        style={{
+          height: 130,
+          background: entry.imageUrl
+            ? `#E8E8E8 url(${entry.imageUrl}) center/cover no-repeat`
+            : (entry.color || '#E8E8E8'),
+          position: 'relative',
+        }}
+      >
+        {!entry.imageUrl && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" opacity="0.3">
+              {isBelly ? (
+                <><ellipse cx="20" cy="18" rx="10" ry="12" fill="#fff" /><ellipse cx="20" cy="32" rx="14" ry="10" fill="#fff" /></>
+              ) : (
+                <><rect x="4" y="6" width="32" height="26" rx="3" fill="#fff" /><path d="M8 24 L13 18 L18 22 L24 14 L32 20" stroke="#DDD" strokeWidth="2" fill="none" strokeLinecap="round" /></>
+              )}
+            </svg>
+          </div>
+        )}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 8,
+            left: 12,
+            background: '#fff',
+            borderRadius: 20,
+            padding: '4px 11px',
+            fontSize: 10,
+            color: '#607090',
+            fontWeight: 500,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+          }}
+        >
           {formatPregnancyWeekDay(entry.week, entry.day)} · {tag}
         </div>
         {entry.isNew && <div style={{position:'absolute',top:8,right:8,background:'rgba(232,96,138,0.9)',color:'#fff',fontSize:10,fontWeight:600,borderRadius:6,padding:'2px 7px'}}>新上传</div>}
@@ -196,47 +192,93 @@ function PhotoCard({ entry }) {
 }
 
 function MilestoneCompletedCard({ entry }) {
-  const emoji = MILESTONE_EMOJIS[entry.week] || '🌸'
+  const heroBg = entry.color || '#DDC8D8'
   return (
-    <div style={{background:'#fff',borderRadius:16,border:'0.5px solid #F0C8D0',overflow:'hidden',marginBottom:12}}>
-      <div style={{height:3,background:'linear-gradient(90deg,#F4A0B0,#E07090,#C060A0)'}}/>
-      <div style={{padding:'14px 14px 0',display:'flex',gap:12,alignItems:'flex-start'}}>
-        <div style={{width:42,height:42,borderRadius:'50%',background:'linear-gradient(135deg,#FFE0E8,#F8C0D0)',border:'1px solid #F0C0CC',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>
-          {emoji}
+    <div style={{ background: '#fff', borderRadius: 16, border: '0.5px solid #EBEBEB', overflow: 'hidden', marginBottom: 12 }}>
+      <div
+        style={{
+          height: 130,
+          background: entry.imageUrl
+            ? `#E8E8E8 url(${entry.imageUrl}) center/cover no-repeat`
+            : heroBg,
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 8,
+            left: 12,
+            background: '#fff',
+            borderRadius: 20,
+            padding: '4px 11px',
+            fontSize: 10,
+            color: '#607090',
+            fontWeight: 500,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+          }}
+        >
+          {formatPregnancyWeekDay(entry.week, entry.day)} · 大事记
         </div>
-        <div style={{flex:1}}>
-          <div style={{fontSize:15,fontWeight:700,color:'#2A1020',marginBottom:4,lineHeight:1.3}}>{entry.title}</div>
-          {entry.note && <div style={{fontSize:12,color:'#9A8090',lineHeight:1.6}}>{entry.note}</div>}
-        </div>
+        {entry.isNew && (
+          <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(232,96,138,0.9)', color: '#fff', fontSize: 10, fontWeight: 600, borderRadius: 6, padding: '2px 7px' }}>新上传</div>
+        )}
       </div>
-      <CardFoot tag="里程碑" tagColor="#D04060" tagBg="#FFE0E8" entry={entry} />
+      {entry.title && (
+        <div style={{ padding: '10px 14px 0', fontSize: 14, fontWeight: 600, color: '#1A1A1A', lineHeight: 1.45 }}>{entry.title}</div>
+      )}
+      {entry.note && (
+        <div style={{ padding: entry.title ? '6px 14px 0' : '10px 14px 0', fontSize: 13, color: '#666', lineHeight: 1.5 }}>{entry.note}</div>
+      )}
+      <CardFoot tag="大事记" tagColor="#D04060" tagBg="#FFE0E8" entry={entry} />
     </div>
   )
 }
+
+/** 时间轴左侧留白宽度（圆点 + 竖实线） */
+const TL_GUTTER = 20
+const TL_LINE_LEFT = 9
 
 function TlDot({ muted }) {
-  return <div style={{width:9,height:9,borderRadius:'50%',background:muted?'#CCC':'#F06080',flexShrink:0}}/>
+  return (
+    <div
+      style={{
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        background: muted ? '#CCC' : '#FF4D8D',
+        flexShrink: 0,
+        position: 'relative',
+        zIndex: 1,
+        boxShadow: '0 0 0 2px #F5F5F7',
+      }}
+    />
+  )
 }
 
-function EmptyWeekNoRecordsCard() {
+/** 左侧竖实线 + 子节点（每行左侧为圆点列，右侧为内容） */
+function TimelineSpine({ children }) {
   return (
-    <div style={{
-      background: '#FAF7F4',
-      borderRadius: 14,
-      border: '1.5px dashed #D8D0C8',
-      padding: '14px 16px',
-      marginBottom: 12,
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: 12,
-    }}>
-      <span style={{ fontSize: 22, lineHeight: 1, filter: 'grayscale(0.2)' }} aria-hidden>🌙</span>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13, color: '#B8A99A', fontStyle: 'italic', lineHeight: 1.65 }}>这一周没有留下记录，</div>
-        <div style={{ fontSize: 13, color: '#B8A99A', fontStyle: 'italic', lineHeight: 1.65 }}>时光悄悄流走了。</div>
-      </div>
+    <div style={{ position: 'relative', paddingBottom: 4 }}>
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          left: TL_LINE_LEFT,
+          top: 12,
+          bottom: 6,
+          width: 1,
+          background: '#D8D8D8',
+          borderRadius: 0.5,
+        }}
+      />
+      {children}
     </div>
   )
+}
+
+function TlGutter() {
+  return <div style={{ width: TL_GUTTER, flexShrink: 0 }} />
 }
 
 function renderEntry(entry, onUpload) {
@@ -263,10 +305,6 @@ export default function FetalPage({ onTabChange }) {
   const pastEntries = useMemo(() => timeline.filter(e => e.date !== TODAY && !e.isPrivate), [timeline])
   const privateEntries = useMemo(() => timeline.filter(e => e.isPrivate), [timeline])
   const weekGroups = useMemo(() => groupByWeekThenDate(pastEntries), [pastEntries])
-  const weekGroupsWithPlaceholders = useMemo(
-    () => mergeWeekGroupsWithPlaceholders(weekGroups, EMPTY_WEEK_ROWS),
-    [weekGroups],
-  )
 
   const sortedTodayEntries = useMemo(() => {
     return [...todayEntries].sort((a, b) => {
@@ -343,33 +381,6 @@ export default function FetalPage({ onTabChange }) {
           </div>
         </div>
 
-        <PregnancyWeekDotsCard
-          data={{
-            currentWeek: CURRENT_WEEK,
-            recordedWeeks: DEFAULT_PREGNANCY_PROGRESS.recordedWeeks,
-          }}
-        />
-
-        {/* 金刚区（与柚柚 tab kong 一致） */}
-        <div style={{ background: '#fff', marginTop: 8, padding: '14px 14px 12px' }}>
-          <div className="kong-grid">
-            {[
-              { label: '大肚照', bg: '#FBEAF0' },
-              { label: '胎儿估重', bg: '#E8F2FC' },
-              { label: '数胎动', bg: '#E8F4E8' },
-              { label: '测胎心', bg: '#E2F5EE' },
-              { label: 'mv制作', bg: '#F5F5F7' },
-            ].map(k => (
-              <div key={k.label} className="kong-item" onClick={() => setShowModal(true)}>
-                <div className="kong-icon" style={{ background: k.bg, position: 'relative' }}>
-                  <div style={{ width: 26, height: 26, background: 'rgba(0,0,0,0.07)', borderRadius: 6 }} />
-                </div>
-                <div className="kong-lbl">{k.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* 四维彩超引导条（与柚柚 tab 云相册引导条样式一致） */}
         <div
           style={{
@@ -407,64 +418,71 @@ export default function FetalPage({ onTabChange }) {
         {/* Timeline */}
         <div style={{background:'#F5F5F7',padding:'14px 12px 100px'}}>
 
-          {/* Today */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <TlDot />
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', flexShrink: 0 }}>今天</span>
-            <span style={{
-              fontSize: 11,
-              color: '#B0A0A0',
-              fontWeight: 500,
-              whiteSpace: 'nowrap',
-              letterSpacing: '0.03em',
-              flexShrink: 0,
-            }}>
-              {formatPregnancyWeekDay(CURRENT_WEEK, CURRENT_DAY)}
-            </span>
-            <div style={{ flex: 1, minWidth: 8, height: '0.5px', background: '#DDD8D4' }} />
-            <div style={{ fontSize: 11, color: '#C8B4B0', whiteSpace: 'nowrap', flexShrink: 0 }}>
-              {getWeekSize(CURRENT_WEEK)}
-            </div>
-          </div>
-
-          {todayMilestone && !hasTodayEntry && (
-            <TodayGuideCard
-              entry={{emoji:MILESTONE_EMOJIS[CURRENT_WEEK]||'📸',title:todayMilestone.title,sub:todayMilestone.sub}}
-              onUpload={()=>setShowModal(true)}
-            />
-          )}
-          {!todayMilestone && !hasTodayEntry && (
-            <div style={{background:'#fff',borderRadius:16,border:'1.5px dashed #F4C0D1',padding:'16px 14px',marginBottom:12,textAlign:'center'}}>
-              <div style={{fontSize:13,color:'#B06080',marginBottom:12,lineHeight:1.6}}>今天{formatPregnancyWeekDay(CURRENT_WEEK, CURRENT_DAY)}，记录一张照片吧 📷</div>
-              <button onClick={()=>setShowModal(true)} style={{background:'#E8608A',color:'#fff',border:'none',borderRadius:20,padding:'8px 24px',fontSize:13,fontWeight:500,cursor:'pointer',fontFamily:'inherit'}}>上传记录</button>
-            </div>
-          )}
-          {sortedTodayEntries.map(e => renderEntry(e, ()=>setShowModal(true)))}
-
-          {/* 按孕周分组 */}
-          {weekGroupsWithPlaceholders.map(({ week, dates }) => (
-            <div key={week}>
-              <div style={{display:'flex',alignItems:'center',gap:8,padding:'14px 0 8px'}}>
-                <div style={{fontSize:11,color:'#B0A0A0',fontWeight:500,whiteSpace:'nowrap',letterSpacing:'0.03em'}}>第 {week} 周</div>
-                <div style={{flex:1,height:'0.5px',background:'#DDD8D4'}}/>
-                <div style={{fontSize:11,color:'#C8B4B0',whiteSpace:'nowrap'}}>{getWeekSize(week)}</div>
+          <TimelineSpine>
+            {/* Today */}
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ width: TL_GUTTER, flexShrink: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <TlDot />
               </div>
-              {dates.length === 0 ? (
-                <EmptyWeekNoRecordsCard />
-              ) : (
-                dates.map(([date, entries]) => (
-                  <div key={date}>
-                    <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:8}}>
-                      <TlDot/>
-                      <span style={{fontSize:13,fontWeight:600,color:'#1A1A1A'}}>{formatDate(date)}</span>
-                      <span style={{fontSize:12,color:'#AAA'}}>{weekLabel(entries[0])}</span>
-                    </div>
-                    {entries.map(e => renderEntry(e, ()=>setShowModal(true)))}
-                  </div>
-                ))
-              )}
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', flexShrink: 0 }}>今天</span>
+                <span style={{
+                  fontSize: 11,
+                  color: '#B0A0A0',
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap',
+                  letterSpacing: '0.03em',
+                  flexShrink: 0,
+                }}>
+                  {formatPregnancyWeekDay(CURRENT_WEEK, CURRENT_DAY)}
+                </span>
+              </div>
             </div>
-          ))}
+
+            <div style={{ display: 'flex', marginBottom: 4 }}>
+              <TlGutter />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {todayMilestone && !hasTodayEntry && (
+                  <TodayGuideCard
+                    entry={{emoji:MILESTONE_EMOJIS[CURRENT_WEEK]||'📸',title:todayMilestone.title,sub:todayMilestone.sub}}
+                    onUpload={()=>setShowModal(true)}
+                  />
+                )}
+                {!todayMilestone && !hasTodayEntry && (
+                  <div style={{background:'#fff',borderRadius:16,border:'1.5px dashed #F4C0D1',padding:'16px 14px',marginBottom:12,textAlign:'center'}}>
+                    <div style={{fontSize:13,color:'#B06080',marginBottom:12,lineHeight:1.6}}>今天{formatPregnancyWeekDay(CURRENT_WEEK, CURRENT_DAY)}，记录一张照片吧</div>
+                    <button onClick={()=>setShowModal(true)} style={{background:'#E8608A',color:'#fff',border:'none',borderRadius:20,padding:'8px 24px',fontSize:13,fontWeight:500,cursor:'pointer',fontFamily:'inherit'}}>上传记录</button>
+                  </div>
+                )}
+                {sortedTodayEntries.map(e => renderEntry(e, ()=>setShowModal(true)))}
+              </div>
+            </div>
+
+            {/* 按孕周分组 */}
+            {weekGroups.map(({ week, dates }, gi) => (
+              <div key={week} style={{ paddingTop: gi === 0 ? 6 : 16 }}>
+                {dates.map(([date, entries]) => (
+                  <div key={date}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                      <div style={{ width: TL_GUTTER, flexShrink: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <TlDot />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+                        <span style={{fontSize:13,fontWeight:600,color:'#1A1A1A'}}>{formatDate(date)}</span>
+                        <span style={{fontSize:12,color:'#AAA'}}>{weekLabel(entries[0])}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', marginBottom: 4 }}>
+                      <TlGutter />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {entries.map(e => renderEntry(e, ()=>setShowModal(true)))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </TimelineSpine>
 
           {/* 私密 */}
           {privateEntries.length > 0 && (
