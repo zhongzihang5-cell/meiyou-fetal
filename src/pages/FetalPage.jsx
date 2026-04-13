@@ -88,31 +88,6 @@ function CardFoot({ tag, tagColor, tagBg, entry }) {
   )
 }
 
-/** 四维彩超 AI 卡片（时间轴内使用，与原先横幅内容一致） */
-function AiFourDInTimelineCard() {
-  return (
-    <div style={{
-      marginBottom: 12,
-      background: 'linear-gradient(135deg,#F5E8FF,#EEE0FF)',
-      borderRadius: 16,
-      padding: '12px 14px',
-      display: 'flex',
-      gap: 12,
-      alignItems: 'center',
-      border: '0.5px solid #E0D0F8',
-    }}>
-      <div style={{ width: 60, height: 60, background: '#E0D0F8', borderRadius: 12, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><ellipse cx="18" cy="15" rx="8" ry="9" fill="#C8A8E8"/><ellipse cx="18" cy="15" rx="5" ry="6" fill="#F0E8FC"/><ellipse cx="18" cy="29" rx="11" ry="8" fill="#C8A8E8"/></svg>
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#4A2080', marginBottom: 3 }}>四维彩超预测宝宝长相</div>
-        <div style={{ fontSize: 11, color: '#7A40B0', marginBottom: 8 }}>美柚 AI 免费一键生成</div>
-        <div style={{ display: 'inline-block', fontSize: 12, background: 'linear-gradient(90deg,#C96DD8,#A855F7)', color: '#fff', borderRadius: 20, padding: '5px 16px', fontWeight: 500, cursor: 'pointer' }}>立即生成</div>
-      </div>
-    </div>
-  )
-}
-
 function TodayGuideCard({ entry, onUpload }) {
   return (
     <div style={{background:'#fff',borderRadius:18,border:'1px solid #F4C0D1',marginBottom:14,overflow:'hidden'}}>
@@ -375,6 +350,60 @@ export default function FetalPage({ onTabChange }) {
           }}
         />
 
+        {/* 金刚区（与柚柚 tab kong 一致） */}
+        <div style={{ background: '#fff', marginTop: 8, padding: '14px 14px 12px' }}>
+          <div className="kong-grid">
+            {[
+              { label: '大肚照', bg: '#FBEAF0' },
+              { label: '胎儿估重', bg: '#E8F2FC' },
+              { label: '数胎动', bg: '#E8F4E8' },
+              { label: '测胎心', bg: '#E2F5EE' },
+              { label: 'mv制作', bg: '#F5F5F7' },
+            ].map(k => (
+              <div key={k.label} className="kong-item" onClick={() => setShowModal(true)}>
+                <div className="kong-icon" style={{ background: k.bg, position: 'relative' }}>
+                  <div style={{ width: 26, height: 26, background: 'rgba(0,0,0,0.07)', borderRadius: 6 }} />
+                </div>
+                <div className="kong-lbl">{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 四维彩超引导条（与柚柚 tab 云相册引导条样式一致） */}
+        <div
+          style={{
+            background: '#fff',
+            margin: '8px 12px',
+            borderRadius: 14,
+            border: '0.5px solid #EBEBEB',
+            padding: '12px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+          }}
+        >
+          <span style={{ fontSize: 13, color: '#666', flex: 1, minWidth: 0, lineHeight: 1.35 }}>四维彩超预测宝宝长相—&gt;</span>
+          <div
+            role="button"
+            tabIndex={0}
+            style={{
+              fontSize: 12,
+              background: '#FBEAF0',
+              color: '#E8608A',
+              borderRadius: 14,
+              padding: '5px 12px',
+              fontWeight: 500,
+              border: '1px solid #F4C0D1',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            立即生成
+          </div>
+        </div>
+
         {/* Timeline */}
         <div style={{background:'#F5F5F7',padding:'14px 12px 100px'}}>
 
@@ -397,8 +426,6 @@ export default function FetalPage({ onTabChange }) {
               {getWeekSize(CURRENT_WEEK)}
             </div>
           </div>
-
-          <AiFourDInTimelineCard />
 
           {todayMilestone && !hasTodayEntry && (
             <TodayGuideCard
