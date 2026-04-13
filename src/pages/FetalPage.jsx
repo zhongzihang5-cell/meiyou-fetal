@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import UploadModal from '../components/UploadModal.jsx'
 import { IconCamera, IconFetalAvatar } from '../components/Icons.jsx'
-import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY } from '../data/timeline.js'
+import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY, formatPregnancyWeekDay } from '../data/timeline.js'
 import { DEFAULT_PREGNANCY_PROGRESS } from '../data/pregnancyProgress.js'
 import PregnancyWeekDotsCard from '../components/PregnancyWeekDotsCard.jsx'
 
@@ -15,7 +15,7 @@ function formatDate(dateStr) {
 }
 
 function weekLabel(entry) {
-  return entry.day > 0 ? `孕 ${entry.week} 周 ${entry.day} 天` : `孕 ${entry.week} 周`
+  return formatPregnancyWeekDay(entry.week, entry.day)
 }
 
 function groupByWeekThenDate(entries) {
@@ -185,7 +185,7 @@ function PhotoCard({ entry }) {
           {isBelly?(<><ellipse cx="20" cy="18" rx="10" ry="12" fill="#fff"/><ellipse cx="20" cy="32" rx="14" ry="10" fill="#fff"/></>):(<><rect x="4" y="6" width="32" height="26" rx="3" fill="#fff"/><path d="M8 24 L13 18 L18 22 L24 14 L32 20" stroke="#DDD" strokeWidth="2" fill="none" strokeLinecap="round"/></>)}
         </svg>
         <div style={{position:'absolute',bottom:8,left:12,background:'rgba(255,255,255,0.78)',borderRadius:10,padding:'2px 9px',fontSize:10,color:'#607090'}}>
-          {entry.week}w · {tag}
+          {formatPregnancyWeekDay(entry.week, entry.day)} · {tag}
         </div>
         {entry.isNew && <div style={{position:'absolute',top:8,right:8,background:'rgba(232,96,138,0.9)',color:'#fff',fontSize:10,fontWeight:600,borderRadius:6,padding:'2px 7px'}}>新上传</div>}
       </div>
@@ -419,7 +419,7 @@ export default function FetalPage({ onTabChange }) {
               letterSpacing: '0.03em',
               flexShrink: 0,
             }}>
-              孕 {CURRENT_WEEK} 周 {CURRENT_DAY} 天
+              {formatPregnancyWeekDay(CURRENT_WEEK, CURRENT_DAY)}
             </span>
             <div style={{ flex: 1, minWidth: 8, height: '0.5px', background: '#DDD8D4' }} />
             <div style={{ fontSize: 11, color: '#C8B4B0', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -435,7 +435,7 @@ export default function FetalPage({ onTabChange }) {
           )}
           {!todayMilestone && !hasTodayEntry && (
             <div style={{background:'#fff',borderRadius:16,border:'1.5px dashed #F4C0D1',padding:'16px 14px',marginBottom:12,textAlign:'center'}}>
-              <div style={{fontSize:13,color:'#B06080',marginBottom:12,lineHeight:1.6}}>今天孕 {CURRENT_WEEK} 周，记录一张照片吧 📷</div>
+              <div style={{fontSize:13,color:'#B06080',marginBottom:12,lineHeight:1.6}}>今天{formatPregnancyWeekDay(CURRENT_WEEK, CURRENT_DAY)}，记录一张照片吧 📷</div>
               <button onClick={()=>setShowModal(true)} style={{background:'#E8608A',color:'#fff',border:'none',borderRadius:20,padding:'8px 24px',fontSize:13,fontWeight:500,cursor:'pointer',fontFamily:'inherit'}}>上传记录</button>
             </div>
           )}

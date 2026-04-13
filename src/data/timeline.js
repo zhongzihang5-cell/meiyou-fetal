@@ -1,3 +1,10 @@
+/** 展示孕周+天数，如 孕29周1天；缺省或非正整数时按第 1 天展示 */
+export function formatPregnancyWeekDay(week, day) {
+  let d = Number(day)
+  if (!Number.isFinite(d) || d < 1) d = 1
+  return `孕${week}周${d}天`
+}
+
 export const MILESTONES = {
   1:  { title: '记录第一次发现宝宝存在', sub: '验孕棒、早早孕试纸，留下这珍贵的一刻', emoji: '🌱' },
   8:  { title: '第一次听到心跳', sub: '拍下 B 超单，留住这个珍贵瞬间', emoji: '💓' },
@@ -26,7 +33,7 @@ export const INITIAL_TIMELINE = [
     type: 'data',
     subtype: 'weight_estimate',
     date: daysAgo(12),   // 4月1日
-    week: 29, day: 0,
+    week: 29, day: 1,
     title: '胎儿估重',
     data: { weight: 1120, head: 248, belly: 220, femur: 42 },
     note: '产检一切正常，医生说发育很好',
@@ -38,7 +45,7 @@ export const INITIAL_TIMELINE = [
     type: 'photo',
     subtype: 'ultrasound',
     date: daysAgo(12),   // 4月1日
-    week: 29, day: 0,
+    week: 29, day: 1,
     title: 'B 超单',
     note: '孕 29 周产检，看到小家伙在动',
     author: '妈妈',
@@ -50,7 +57,7 @@ export const INITIAL_TIMELINE = [
     type: 'photo',
     subtype: 'belly',
     date: daysAgo(11),   // 4月2日
-    week: 29, day: 1,
+    week: 29, day: 2,
     title: '大肚照',
     note: '29 周了，肚子超级圆 🌕',
     author: '妈妈',
@@ -100,7 +107,7 @@ export const INITIAL_TIMELINE = [
     type: 'milestone',
     subtype: 'heartbeat',
     date: daysAgo(140),
-    week: 8, day: 0,
+    week: 8, day: 1,
     title: '第一次听到心跳',
     note: '168次/分钟，好快！眼泪都出来了',
     author: '妈妈',
@@ -110,12 +117,11 @@ export const INITIAL_TIMELINE = [
     id: 'e-007',
     type: 'milestone',
     subtype: 'found',
-    date: daysAgo(189),
-    week: 1, day: 0,
+    date: '2025-10-06',
+    week: 1, day: 1,
     title: '发现宝宝存在',
     note: '两条线，手都在抖！',
     author: '妈妈',
-    isPrivate: true,
     time: '08:12',
   },
 ]

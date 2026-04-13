@@ -1,5 +1,5 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
-import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO } from '../data/timeline.js'
+import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO, formatPregnancyWeekDay } from '../data/timeline.js'
 
 const MILESTONE_EMOJIS = { 1: '🌱', 8: '💓', 12: '📋', 16: '🤲', 22: '🔬', 28: '📸', 29: '📸', 30: '📸', 36: '⏰' }
 
@@ -144,7 +144,7 @@ function FetalDataCardSmall({ entry }) {
     <div style={{ background: '#fff', borderRadius: 14, border: '0.5px solid #EBEBEB', marginBottom: 10, opacity: 0.9, overflow: 'hidden' }}>
       <div style={{ padding: '10px 14px 0' }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-          <span style={{ fontSize: 11, color: '#CCC' }}>孕{entry.week}周</span>
+          <span style={{ fontSize: 11, color: '#CCC' }}>{formatPregnancyWeekDay(entry.week, entry.day)}</span>
         </div>
 
         {isWeight && entry.data && (
@@ -385,7 +385,7 @@ export default function BabyPage({ onTabChange }) {
             const first = entries[0]
             const d = new Date(date)
             const dateLabel = `${d.getMonth() + 1} 月 ${d.getDate()} 日`
-            const wLabel = first.day > 0 ? `孕 ${first.week} 周 ${first.day} 天` : `孕 ${first.week} 周`
+            const wLabel = formatPregnancyWeekDay(first.week, first.day)
             return (
               <div key={date} style={{ opacity: 0.75 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>

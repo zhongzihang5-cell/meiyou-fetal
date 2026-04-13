@@ -1,4 +1,5 @@
 // Individual card types for the fetal timeline
+import { formatPregnancyWeekDay } from '../data/timeline.js'
 
 export function MilestoneCard({ entry, onUpload }) {
   return (
@@ -81,7 +82,7 @@ export function WeightEstimateCard({ entry }) {
           胎儿估重
         </span>
         <span style={{ fontSize: 12, color: '#AAA' }}>
-          {date} · 孕{entry.week}周
+          {date} · {formatPregnancyWeekDay(entry.week, entry.day)}
         </span>
       </div>
       <div style={{ display: 'flex' }}>
@@ -198,7 +199,7 @@ export function PhotoCard({ entry }) {
           <div style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>{entry.title}</div>
           {entry.note && <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{entry.note}</div>}
           <div style={{ fontSize: 11, color: '#AAA', marginTop: 3 }}>
-            孕{entry.week}周{entry.day > 0 ? entry.day + '天' : ''} · {entry.author}
+            {formatPregnancyWeekDay(entry.week, entry.day)} · {entry.author}
           </div>
         </div>
       </div>
@@ -233,7 +234,7 @@ export function MilestoneCompletedCard({ entry }) {
           <div style={{ fontSize: 12, color: '#888', lineHeight: 1.5 }}>{entry.note}</div>
         )}
         <div style={{ fontSize: 11, color: '#AAA', marginTop: 4 }}>
-          孕{entry.week}周 · {entry.author}
+          {formatPregnancyWeekDay(entry.week, entry.day)} · {entry.author}
         </div>
       </div>
     </div>
@@ -241,9 +242,10 @@ export function MilestoneCompletedCard({ entry }) {
 }
 
 // Generic empty milestone prompt card (used for today's prompt when no milestone)
-export function DailyPromptCard({ week, onUpload }) {
+export function DailyPromptCard({ week, day = 1, onUpload }) {
+  const w = formatPregnancyWeekDay(week, day)
   const prompts = [
-    '今天孕 ' + week + ' 周，记录一张照片吧',
+    `今天${w}，记录一张照片吧`,
     '写下今天的心情，留给未来的宝宝看',
     '上传今天的产检记录',
   ]
