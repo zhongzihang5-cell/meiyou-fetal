@@ -1,7 +1,7 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO } from '../data/timeline.js'
 
-const MILESTONE_EMOJIS = { 1: '🌱', 8: '💓', 12: '📋', 16: '🤲', 22: '🔬', 28: '📸', 36: '⏰' }
+const MILESTONE_EMOJIS = { 1: '🌱', 8: '💓', 12: '📋', 16: '🤲', 22: '🔬', 28: '📸', 29: '📸', 36: '⏰' }
 
 const TODAY_STR = new Date().toISOString().split('T')[0]
 
@@ -228,6 +228,9 @@ function TlDot({ muted, small }) {
 
 export default function BabyPage({ onTabChange }) {
   const b = BIRTH_INFO
+  const heroAgeLabel = BABY_TIMELINE_AFTER.find(e => e.isToday)?.ageLabel
+    || BABY_TIMELINE_AFTER[0]?.ageLabel
+    || '2 岁 6 天'
   // Public fetal entries (not private)
   const fetalPublic = INITIAL_TIMELINE.filter(e => !e.isPrivate)
   // Group fetal entries by date for display
@@ -259,19 +262,51 @@ export default function BabyPage({ onTabChange }) {
 
       <div className="scroll-area" style={{ flex: 1 }}>
 
-        {/* Hero */}
-        <div style={{ height: 200, position: 'relative', background: 'linear-gradient(160deg, #B8D0C8, #D4ECD0)', overflow: 'hidden' }}>
-          <svg width="100%" height="200" viewBox="0 0 390 200" preserveAspectRatio="xMidYMid slice" style={{ position: 'absolute', inset: 0 }}>
-            <ellipse cx="195" cy="100" rx="60" ry="70" fill="#D4E8E0" opacity="0.5"/>
-            <ellipse cx="195" cy="80" rx="38" ry="40" fill="#EAF4F0" opacity="0.6"/>
-            <ellipse cx="195" cy="155" rx="52" ry="36" fill="#D4E8E0" opacity="0.4"/>
-          </svg>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '14px 16px', background: 'linear-gradient(transparent, rgba(0,0,0,0.26))' }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{b.name}</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', marginTop: 2 }}>2 岁 6 天</div>
-          </div>
-          <div style={{ position: 'absolute', top: 14, right: 14, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.92)', borderRadius: 20, padding: '6px 12px', fontSize: 12, fontWeight: 500, color: '#E8608A', cursor: 'pointer' }}>
-            邀请亲友
+        {/* Hero：与胎宝宝 tab 同构（底对齐头像 + 文案 + 邀请按钮） */}
+        <div style={{ borderBottom: '0.5px solid #F2F2F2' }}>
+          <div style={{
+            position: 'relative',
+            minHeight: 176,
+            backgroundColor: '#E8E4E0',
+            backgroundImage: 'url(/baby-header-bg.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 32%',
+          }}>
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.38) 55%, rgba(0,0,0,0.52) 100%)',
+              pointerEvents: 'none',
+            }} />
+            <div style={{
+              position: 'relative', zIndex: 1,
+              minHeight: 176,
+              display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+              padding: '18px 16px 16px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.22)', border: '2px solid rgba(255,255,255,0.85)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                  backdropFilter: 'blur(4px)', fontSize: 26, lineHeight: 1,
+                }}>
+                  👶
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 17, fontWeight: 600, color: '#fff', textShadow: '0 1px 8px rgba(0,0,0,0.35)' }}>{b.name}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.88)', marginTop: 3, textShadow: '0 1px 6px rgba(0,0,0,0.35)' }}>{heroAgeLabel}</div>
+                </div>
+                <div style={{
+                  fontSize: 12, color: '#fff', borderRadius: 20, padding: '7px 12px',
+                  background: 'rgba(0,0,0,0.38)', fontWeight: 500, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 4, border: '0.5px solid rgba(255,255,255,0.25)',
+                  backdropFilter: 'blur(6px)',
+                }}>
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#fff" strokeWidth="1.4"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#fff" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                  邀请亲友
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

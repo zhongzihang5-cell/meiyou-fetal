@@ -1,4 +1,5 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
+import { DAYS_UNTIL_DUE } from '../data/timeline.js'
 
 export default function MamaPage({ onTabChange }) {
   return (
@@ -15,8 +16,7 @@ export default function MamaPage({ onTabChange }) {
         <div className="top-nav-tabs">
           <div className="nav-tab active">妈妈</div>
           <div className="nav-tab" onClick={() => onTabChange('fetal')}>胎宝宝</div>
-          <div className="nav-tab" onClick={() => onTabChange('baby')}>嬷嬷</div>
-          <div className="nav-tab" onClick={() => onTabChange('baby')}>呢呢</div>
+          <div className="nav-tab" onClick={() => onTabChange('baby')}>柚柚</div>
         </div>
         <div style={{ padding: '0 6px' }}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -47,7 +47,7 @@ export default function MamaPage({ onTabChange }) {
             fontSize: 11, opacity: 0.85,
             background: 'rgba(255,255,255,0.2)',
             borderRadius: 10, padding: '3px 8px',
-          }}>距预产期 83 天</div>
+          }}>距预产期 {DAYS_UNTIL_DUE} 天</div>
 
           <div style={{ display: 'flex', gap: 0, marginBottom: 10, overflow: 'hidden' }}>
             {[
@@ -161,7 +161,7 @@ export default function MamaPage({ onTabChange }) {
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#F0E8FC', flexShrink: 0 }} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 500 }}>♂ ____北风</div>
-                <div style={{ fontSize: 11, color: '#AAA' }}>嬷嬷 · 产后第1天</div>
+                <div style={{ fontSize: 11, color: '#AAA' }}>柚柚 · 产后第1天</div>
               </div>
               <div style={{ marginLeft: 'auto', color: '#AAA' }}>···</div>
             </div>

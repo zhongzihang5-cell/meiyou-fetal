@@ -58,7 +58,7 @@ function mergeWeekGroupsWithPlaceholders(weekGroups, placeholders) {
   return [...map.values()].sort((a, b) => b.week - a.week)
 }
 
-const MILESTONE_EMOJIS = {1:'🌱',8:'💓',12:'📋',16:'🤲',22:'🔬',28:'📸',36:'⏰'}
+const MILESTONE_EMOJIS = {1:'🌱',8:'💓',12:'📋',16:'🤲',22:'🔬',28:'📸',29:'📸',36:'⏰'}
 
 function CardFoot({ tag, tagColor, tagBg, entry }) {
   const t = entry.time ? ` ${entry.time}` : ''
@@ -81,6 +81,31 @@ function CardFoot({ tag, tagColor, tagBg, entry }) {
             评论
           </span>
         </div>
+      </div>
+    </div>
+  )
+}
+
+/** 四维彩超 AI 卡片（时间轴内使用，与原先横幅内容一致） */
+function AiFourDInTimelineCard() {
+  return (
+    <div style={{
+      marginBottom: 12,
+      background: 'linear-gradient(135deg,#F5E8FF,#EEE0FF)',
+      borderRadius: 16,
+      padding: '12px 14px',
+      display: 'flex',
+      gap: 12,
+      alignItems: 'center',
+      border: '0.5px solid #E0D0F8',
+    }}>
+      <div style={{ width: 60, height: 60, background: '#E0D0F8', borderRadius: 12, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><ellipse cx="18" cy="15" rx="8" ry="9" fill="#C8A8E8"/><ellipse cx="18" cy="15" rx="5" ry="6" fill="#F0E8FC"/><ellipse cx="18" cy="29" rx="11" ry="8" fill="#C8A8E8"/></svg>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#4A2080', marginBottom: 3 }}>四维彩超预测宝宝长相</div>
+        <div style={{ fontSize: 11, color: '#7A40B0', marginBottom: 8 }}>美柚 AI 免费一键生成</div>
+        <div style={{ display: 'inline-block', fontSize: 12, background: 'linear-gradient(90deg,#C96DD8,#A855F7)', color: '#fff', borderRadius: 20, padding: '5px 16px', fontWeight: 500, cursor: 'pointer' }}>立即生成</div>
       </div>
     </div>
   )
@@ -268,6 +293,13 @@ export default function FetalPage({ onTabChange }) {
 
   const pct = Math.round((CURRENT_WEEK * 7 + CURRENT_DAY) / (40 * 7) * 100)
 
+  const sortedTodayEntries = useMemo(() => {
+    return [...todayEntries].sort((a, b) => {
+      const bellyRank = e => (e.type === 'photo' && e.subtype === 'belly' ? 1 : 0)
+      return bellyRank(a) - bellyRank(b)
+    })
+  }, [todayEntries])
+
   return (
     <div className="phone-shell" style={{display:'flex',flexDirection:'column',height:'100%'}}>
       <StatusBar/>
@@ -288,42 +320,63 @@ export default function FetalPage({ onTabChange }) {
 
       <div className="scroll-area" style={{flex:1}}>
 
-        {/* Header */}
-        <div style={{background:'#fff',padding:'12px 16px 14px',borderBottom:'0.5px solid #F2F2F2'}}>
-          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
-            <div style={{width:48,height:48,borderRadius:'50%',background:'#FBEAF0',border:'2px solid #F4C0D1',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
-              <IconFetalAvatar/>
-            </div>
-            <div style={{flex:1}}>
-              <div style={{fontSize:16,fontWeight:600,color:'#1A1A1A'}}>胎宝宝</div>
-              <div style={{fontSize:11,color:'#C0B0B0',marginTop:1}}>1位亲友可见</div>
-            </div>
-            <div style={{fontSize:12,color:'#993556',border:'1px solid #F4C0D1',borderRadius:20,padding:'6px 12px',background:'#FBEAF0',fontWeight:500,cursor:'pointer',display:'flex',alignItems:'center',gap:4}}>
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#993556" strokeWidth="1.4"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#993556" strokeWidth="1.4" strokeLinecap="round"/></svg>
-              邀请准爸爸
+        {/* Header：背景图 + 底部信息条（孕程进度） */}
+        <div style={{ borderBottom: '0.5px solid #F2F2F2' }}>
+          <div style={{
+            position: 'relative',
+            minHeight: 176,
+            backgroundColor: '#D8C4BC',
+            backgroundImage: 'url(/fetal-header-bg.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 28%',
+          }}>
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.38) 55%, rgba(0,0,0,0.52) 100%)',
+              pointerEvents: 'none',
+            }} />
+            <div style={{
+              position: 'relative', zIndex: 1,
+              minHeight: 176,
+              display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+              padding: '18px 16px 16px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.22)', border: '2px solid rgba(255,255,255,0.85)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                  backdropFilter: 'blur(4px)',
+                }}>
+                  <IconFetalAvatar />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 17, fontWeight: 600, color: '#fff', textShadow: '0 1px 8px rgba(0,0,0,0.35)' }}>胎宝宝</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.88)', marginTop: 3, textShadow: '0 1px 6px rgba(0,0,0,0.35)' }}>1位亲友可见</div>
+                </div>
+                <div style={{
+                  fontSize: 12, color: '#fff', borderRadius: 20, padding: '7px 12px',
+                  background: 'rgba(0,0,0,0.38)', fontWeight: 500, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 4, border: '0.5px solid rgba(255,255,255,0.25)',
+                  backdropFilter: 'blur(6px)',
+                }}>
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#fff" strokeWidth="1.4"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#fff" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                  邀请准爸爸
+                </div>
+              </div>
             </div>
           </div>
-          <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',marginBottom:8}}>
-            <div style={{fontSize:13,color:'#1A1A1A'}}>
-              <span style={{color:'#E07080',fontWeight:600}}>第 {CURRENT_WEEK} 周</span>
-              <span style={{color:'#AAA'}}> · 还有 {DAYS_UNTIL_DUE} 天</span>
+          <div style={{ background: '#fff', padding: '12px 16px 14px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+              <div style={{ fontSize: 13, color: '#1A1A1A' }}>
+                <span style={{ color: '#E07080', fontWeight: 600 }}>第 {CURRENT_WEEK} 周</span>
+                <span style={{ color: '#AAA' }}> · 还有 {DAYS_UNTIL_DUE} 天</span>
+              </div>
+              <div style={{ fontSize: 11, color: '#C0A8A0' }}>孕程 {pct}%</div>
             </div>
-            <div style={{fontSize:11,color:'#C0A8A0'}}>孕程 {pct}%</div>
-          </div>
-          <div style={{height:4,background:'#F0EAEA',borderRadius:3,overflow:'hidden'}}>
-            <div style={{width:`${pct}%`,height:'100%',background:'linear-gradient(90deg,#E890A0,#C86090)',borderRadius:3}}/>
-          </div>
-        </div>
-
-        {/* AI Banner */}
-        <div style={{margin:'10px 12px 0',background:'linear-gradient(135deg,#F5E8FF,#EEE0FF)',borderRadius:16,padding:'12px 14px',display:'flex',gap:12,alignItems:'center',border:'0.5px solid #E0D0F8'}}>
-          <div style={{width:60,height:60,background:'#E0D0F8',borderRadius:12,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><ellipse cx="18" cy="15" rx="8" ry="9" fill="#C8A8E8"/><ellipse cx="18" cy="15" rx="5" ry="6" fill="#F0E8FC"/><ellipse cx="18" cy="29" rx="11" ry="8" fill="#C8A8E8"/></svg>
-          </div>
-          <div style={{flex:1}}>
-            <div style={{fontSize:14,fontWeight:700,color:'#4A2080',marginBottom:3}}>四维彩超预测宝宝长相</div>
-            <div style={{fontSize:11,color:'#7A40B0',marginBottom:8}}>美柚 AI 免费一键生成</div>
-            <div style={{display:'inline-block',fontSize:12,background:'linear-gradient(90deg,#C96DD8,#A855F7)',color:'#fff',borderRadius:20,padding:'5px 16px',fontWeight:500,cursor:'pointer'}}>立即生成</div>
+            <div style={{ height: 4, background: '#F0EAEA', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg,#E890A0,#C86090)', borderRadius: 3 }} />
+            </div>
           </div>
         </div>
 
@@ -337,6 +390,8 @@ export default function FetalPage({ onTabChange }) {
             <span style={{fontSize:12,color:'#AAA'}}>孕 {CURRENT_WEEK} 周 {CURRENT_DAY} 天</span>
           </div>
 
+          <AiFourDInTimelineCard />
+
           {todayMilestone && !hasTodayEntry && (
             <TodayGuideCard
               entry={{emoji:MILESTONE_EMOJIS[CURRENT_WEEK]||'📸',title:todayMilestone.title,sub:todayMilestone.sub}}
@@ -349,7 +404,7 @@ export default function FetalPage({ onTabChange }) {
               <button onClick={()=>setShowModal(true)} style={{background:'#E8608A',color:'#fff',border:'none',borderRadius:20,padding:'8px 24px',fontSize:13,fontWeight:500,cursor:'pointer',fontFamily:'inherit'}}>上传记录</button>
             </div>
           )}
-          {todayEntries.map(e => renderEntry(e, ()=>setShowModal(true)))}
+          {sortedTodayEntries.map(e => renderEntry(e, ()=>setShowModal(true)))}
 
           {/* 按孕周分组 */}
           {weekGroupsWithPlaceholders.map(({ week, dates }) => (

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import PhotoGalleryPicker from './PhotoGalleryPicker.jsx'
 
 const UPLOAD_TYPES = [
   {
@@ -59,7 +60,7 @@ const UPLOAD_TYPES = [
 
 export default function UploadModal({ onClose, onSubmit }) {
   const [selected, setSelected] = useState(null)
-  const [step, setStep] = useState('choose') // 'choose' | 'form'
+  const [step, setStep] = useState('gallery') // 'gallery' | 'choose' | 'form'
   const [form, setForm] = useState({})
   const [note, setNote] = useState('')
 
@@ -75,8 +76,8 @@ export default function UploadModal({ onClose, onSubmit }) {
       type: selected === 'belly' || selected === 'ultrasound' ? 'photo' : 'data',
       subtype: selected,
       date: new Date().toISOString().split('T')[0],
-      week: 28,
-      day: 3,
+      week: 29,
+      day: 1,
       title: type.label,
       note,
       data: form,
@@ -85,6 +86,10 @@ export default function UploadModal({ onClose, onSubmit }) {
       isNew: true,
     })
     onClose()
+  }
+
+  if (step === 'gallery') {
+    return <PhotoGalleryPicker onClose={onClose} onContinue={() => setStep('choose')} />
   }
 
   return (

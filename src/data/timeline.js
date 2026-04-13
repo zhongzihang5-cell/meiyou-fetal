@@ -5,6 +5,7 @@ export const MILESTONES = {
   16: { title: '第一次感受到胎动', sub: '记录下来，这一刻无比珍贵', emoji: '🤲' },
   22: { title: '四维彩超', sub: '看看宝宝长什么样', emoji: '🔬' },
   28: { title: '孕 28 周，拍一张大肚照吧', sub: '进入孕晚期，留下最美的孕肚时光', emoji: '📸' },
+  29: { title: '孕 29 周，拍一张大肚照吧', sub: '进入孕晚期，留下最美的孕肚时光', emoji: '📸' },
   36: { title: '待产倒计时', sub: '记录最后的孕肚时光，宝宝快来了', emoji: '⏰' },
 }
 
@@ -18,13 +19,13 @@ function daysAgo(n) {
 }
 
 export const INITIAL_TIMELINE = [
-  // ── 第 28 周：分散在两天 ──
+  // ── 第 29 周：分散在两天 ──
   {
     id: 'e-001',
     type: 'data',
     subtype: 'weight_estimate',
     date: daysAgo(12),   // 4月1日
-    week: 28, day: 0,
+    week: 29, day: 0,
     title: '胎儿估重',
     data: { weight: 1120, head: 248, belly: 220, femur: 42 },
     note: '产检一切正常，医生说发育很好',
@@ -36,9 +37,9 @@ export const INITIAL_TIMELINE = [
     type: 'photo',
     subtype: 'ultrasound',
     date: daysAgo(12),   // 4月1日
-    week: 28, day: 0,
+    week: 29, day: 0,
     title: 'B 超单',
-    note: '孕 28 周产检，看到小家伙在动',
+    note: '孕 29 周产检，看到小家伙在动',
     author: '妈妈',
     color: '#C8D8E8',
     time: '15:20',
@@ -48,9 +49,9 @@ export const INITIAL_TIMELINE = [
     type: 'photo',
     subtype: 'belly',
     date: daysAgo(11),   // 4月2日
-    week: 28, day: 1,
+    week: 29, day: 1,
     title: '大肚照',
-    note: '28 周了，肚子超级圆 🌕',
+    note: '29 周了，肚子超级圆 🌕',
     author: '妈妈',
     color: '#E8D4C8',
     time: '10:05',
@@ -167,6 +168,6 @@ export const BIRTH_INFO = {
   lunar: '农历 二月廿二',
 }
 
-export const CURRENT_WEEK = 28
-export const CURRENT_DAY = 3
-export const DAYS_UNTIL_DUE = 83
+export const CURRENT_WEEK = 29
+export const CURRENT_DAY = 1
+export const DAYS_UNTIL_DUE = 76
