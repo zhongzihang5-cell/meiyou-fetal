@@ -1,8 +1,11 @@
 import { useState, useMemo } from 'react'
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import UploadModal from '../components/UploadModal.jsx'
-import { IconCamera, IconFetalAvatar } from '../components/Icons.jsx'
+import { IconBabyFootprint, IconCamera, IconFetalAvatar, IconTinyHeart } from '../components/Icons.jsx'
 import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY, formatPregnancyWeekDay, deriveFetalMovementMetrics } from '../data/timeline.js'
+import { FETAL_MOVEMENT_THEME } from '../lib/fetalCardThemes.js'
+import { buildHeartCurvePolylinePoints, formatHeartDuration, formatHeartMeasurementDateTime, getHeartRateTheme } from '../lib/heartRateCard.js'
+import { getWeightEstimateTheme, getWeightMetricsDisplay } from '../lib/weightEstimateCard.js'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
@@ -34,7 +37,7 @@ function groupByWeekThenDate(entries) {
 
 const MILESTONE_EMOJIS = {1:'🌱',8:'💓',12:'📋',16:'🤲',22:'🔬',28:'📸',29:'📸',30:'📸',36:'⏰'}
 
-function CardFoot({ tag, tagColor, tagBg, entry }) {
+function CardFoot({ tag, tagColor, tagBg, tagBorder, entry }) {
   const t = entry.time ? ` ${entry.time}` : ''
   const lock = entry.isPrivate ? '  🔒 仅自己可见' : ''
   const metaText = `${entry.author || '妈妈'}  ${formatDate(entry.date)}${t}${lock}`
@@ -42,7 +45,11 @@ function CardFoot({ tag, tagColor, tagBg, entry }) {
     <div style={{borderTop:'0.5px solid #F2F2F2',marginTop:8}}>
       <div style={{padding:'5px 14px 2px',fontSize:12,color:'#C0B0A8'}}>{metaText}</div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'5px 14px 11px'}}>
-        <span style={{fontSize:11,fontWeight:500,color:tagColor,background:tagBg,borderRadius:20,padding:'3px 10px',cursor:'pointer',display:'inline-flex',alignItems:'center',gap:3}}>
+        <span style={{
+          fontSize:11,fontWeight:500,color:tagColor,background:tagBg,borderRadius:20,padding:'3px 10px',
+          border: tagBorder ? `0.5px solid ${tagBorder}` : '0.5px solid transparent',
+          cursor:'pointer',display:'inline-flex',alignItems:'center',gap:3,
+        }}>
           {tag} <span style={{opacity:0.5,fontSize:10}}>›</span>
         </span>
         <div style={{display:'flex',gap:14}}>
@@ -78,39 +85,135 @@ function TodayGuideCard({ entry, onUpload }) {
 }
 
 function WeightEstimateCard({ entry }) {
-  const { data } = entry
+  const data = entry.data || {}
+  const weight = Number(data.weight)
+  const weightStr = Number.isFinite(weight) ? String(Math.round(weight)) : '—'
+  const pct = Number(data.percentile)
+  const pctStr = Number.isFinite(pct) ? `P${Math.round(pct)}` : '—'
+  const t = getWeightEstimateTheme()
+  const metrics = getWeightMetricsDisplay(data)
+
   return (
-    <div style={{background:'#fff',borderRadius:16,border:'0.5px solid #EBEBEB',marginBottom:12,overflow:'hidden'}}>
-      <div style={{padding:'13px 14px 0'}}>
-        <div style={{display:'flex'}}>
-          {[{key:'weight',label:'体重',unit:'g'},{key:'head',label:'头围',unit:'mm'},{key:'belly',label:'腹围',unit:'mm'},{key:'femur',label:'股骨',unit:'mm'}]
-            .filter(f=>data?.[f.key])
-            .map((f,i)=>(
-              <div key={f.key} style={{flex:1,textAlign:'center',borderLeft:i>0?'0.5px solid #F2F2F2':'none'}}>
-                <div style={{fontSize:22,fontWeight:700,color:'#1A1A1A',letterSpacing:-0.5}}>{data[f.key]}</div>
-                <div style={{fontSize:10,color:'#AAA'}}>{f.unit}</div>
-                <div style={{fontSize:10,color:'#AAA',marginTop:2}}>{f.label}</div>
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 16,
+        border: `0.5px solid ${t.border}`,
+        marginBottom: 12,
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ padding: '14px 14px 0' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'baseline',
+            gap: '0 4px',
+            width: '100%',
+            textAlign: 'left',
+            fontSize: 14,
+            fontWeight: 700,
+            color: t.headline,
+            lineHeight: 1.45,
+            marginBottom: 14,
+          }}
+        >
+          <span>宝宝又长大了一点点</span>
+          <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', flexShrink: 0 }} role="img" aria-label="宝宝脚印">
+            <IconBabyFootprint color={t.footprint} size={16} />
+          </span>
+        </div>
+
+        <div style={{ background: t.blockBg, borderRadius: 10, padding: '14px 14px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              gap: 12,
+            }}
+          >
+            <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+              <div style={{ fontSize: 11, color: t.label, marginBottom: 6 }}>估计体重</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0 2px' }}>
+                <span
+                  style={{
+                    fontSize: 32,
+                    fontWeight: 700,
+                    color: t.numStrong,
+                    fontVariantNumeric: 'tabular-nums',
+                    letterSpacing: -0.5,
+                    lineHeight: 1.08,
+                  }}
+                >
+                  {weightStr}
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: t.numStrong }}>g</span>
+              </div>
+            </div>
+            <div style={{ flexShrink: 0, textAlign: 'right', minWidth: 0 }}>
+              <div style={{ fontSize: 10, color: t.label, marginBottom: 6 }}>百分位</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: t.numStrong, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2, marginBottom: 4 }}>
+                {pctStr}
+              </div>
+              <div style={{ fontSize: 10, fontWeight: 400, color: t.pctSub, lineHeight: 1.35 }}>正常 P10–P90</div>
+            </div>
+          </div>
+
+          <div style={{ height: '0.5px', background: t.divider, margin: '12px -14px' }} />
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              flexWrap: 'nowrap',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: 4,
+              width: '100%',
+            }}
+          >
+            {metrics.map(m => (
+              <div key={m.key} style={{ minWidth: 0, flex: '1 1 0', textAlign: 'center' }}>
+                <div style={{ fontSize: 9, color: t.label, marginBottom: 4, lineHeight: 1.25 }}>{m.label}</div>
+                <div style={{ fontSize: 11, fontWeight: 500, color: t.numStrong, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                  {m.value != null ? (
+                    <>
+                      {m.value}
+                      <span style={{ fontWeight: 400, color: t.unitMm }}> mm</span>
+                    </>
+                  ) : (
+                    <>
+                      —
+                      <span style={{ fontWeight: 400, color: t.unitMm }}> mm</span>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
+          </div>
         </div>
-        {entry.note && <div style={{marginTop:10,fontSize:12,color:'#888',borderTop:'0.5px solid #F2F2F2',paddingTop:8}}>{entry.note}</div>}
+
+        {entry.note && (
+          <div style={{ marginTop: 10, marginBottom: 4, fontSize: 12, color: '#888', lineHeight: 1.45 }}>{entry.note}</div>
+        )}
       </div>
-      <CardFoot tag="胎儿估重" tagColor="#E05070" tagBg="#FFE8EE" entry={entry} />
+      <CardFoot tag="胎儿估重" tagColor={t.footTag} tagBg={t.footBg} tagBorder={t.footBorder} entry={entry} />
     </div>
   )
 }
 
 function FetalMovementCard({ entry }) {
   const { data } = entry
-  const primary = '#B84868'
-  const blockBg = '#FFFBFC'
-  const divider = '#F3EAED'
-  const secondary = '#7A626E'
-  const assist = '#8B757E'
-  const body = '#2E2C2D'
+  const tm = FETAL_MOVEMENT_THEME
+  const primary = tm.primary
+  const blockBg = tm.blockBg
+  const divider = tm.divider
+  const secondary = tm.secondary
+  const assist = tm.assist
 
-  const { rows, totalValid, totalMinutes } = deriveFetalMovementMetrics(data, entry)
-  const minutesRounded = Math.round(totalMinutes)
+  const { rows, totalValid } = deriveFetalMovementMetrics(data, entry)
   const totalDisplay = Number.isFinite(totalValid) ? totalValid : '--'
 
   return (
@@ -118,27 +221,44 @@ function FetalMovementCard({ entry }) {
       style={{
         background: '#fff',
         borderRadius: 16,
-        border: '0.5px solid #EBEBEB',
+        border: `0.5px solid ${tm.border}`,
         marginBottom: 12,
         overflow: 'hidden',
       }}
     >
-      <div style={{ padding: '14px 14px 12px' }}>
-        <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: 14, fontWeight: 400, color: body, lineHeight: 1.6 }}>
-            <span style={{ color: primary, fontWeight: 700 }}>{minutesRounded}分钟</span>
-            里，你放下整个世界
+      <div style={{ padding: '14px 14px 0' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 8,
+            width: '100%',
+            marginBottom: 14,
+          }}
+        >
+          <div
+            style={{
+              flex: '1 1 auto',
+              minWidth: 0,
+              textAlign: 'left',
+              fontSize: 14,
+              fontWeight: 700,
+              color: primary,
+              lineHeight: 1.45,
+            }}
+          >
+            <div>你动一下，我数一下</div>
+            <div style={{ marginTop: 2, textAlign: 'right', color: tm.titleSecondLine, fontWeight: 700 }}>——这是我们的小暗号</div>
           </div>
-          <div style={{ fontSize: 14, fontWeight: 400, color: body, lineHeight: 1.6, marginTop: 4 }}>
-            等一个不确定什么时候会来的轻踢
-          </div>
+          <span style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center' }} role="img" aria-label="宝宝脚印">
+            <IconBabyFootprint color={tm.footprint} size={16} />
+          </span>
         </div>
 
         <div
           style={{
-            marginTop: 14,
             background: blockBg,
-            borderRadius: 12,
+            borderRadius: 10,
             padding: '12px 14px 14px',
           }}
         >
@@ -193,7 +313,7 @@ function FetalMovementCard({ entry }) {
                 <span
                   style={{
                     fontSize: 12,
-                    fontWeight: 400,
+                    fontWeight: 700,
                     color: primary,
                     textAlign: 'center',
                     fontVariantNumeric: 'tabular-nums',
@@ -230,24 +350,116 @@ function FetalMovementCard({ entry }) {
           </div>
         </div>
       </div>
-      <CardFoot tag="数胎动" tagColor={primary} tagBg="#F8ECEF" entry={entry} />
+
+      <CardFoot tag="数胎动" tagColor={tm.footTag} tagBg={tm.footBg} tagBorder={tm.footBorder} entry={entry} />
     </div>
   )
 }
 
 function HeartRateCard({ entry }) {
-  const bpm = entry.data?.bpm || 0
+  const d = entry.data || {}
+  const bpm = Number(d.bpm) || 0
+  const abnormal = d.abnormal === true
+  const t = getHeartRateTheme(abnormal)
+  const wavePoints = buildHeartCurvePolylinePoints(Array.isArray(d.heart_curve) ? d.heart_curve : null, 320, 44)
+  const measuredAt = formatHeartMeasurementDateTime(entry)
+
   return (
-    <div style={{background:'#fff',borderRadius:16,border:'0.5px solid #EBEBEB',marginBottom:12,overflow:'hidden'}}>
-      <div style={{padding:'13px 14px 0'}}>
-        <div style={{textAlign:'center'}}>
-          <div style={{fontSize:36,fontWeight:700,color:'#1A1A1A',letterSpacing:-1}}>{bpm}</div>
-          <div style={{fontSize:11,color:'#AAA'}}>次 / 分钟</div>
-          <div style={{fontSize:11,color:'#AAA',marginTop:2}}>胎心率</div>
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 16,
+        border: `0.5px solid ${t.border}`,
+        marginBottom: 12,
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ padding: '14px 14px 0' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'baseline',
+            gap: '0 4px',
+            width: '100%',
+            textAlign: 'left',
+            fontSize: 14,
+            fontWeight: 700,
+            color: t.headline,
+            lineHeight: 1.45,
+            marginBottom: 14,
+          }}
+        >
+          <span>每一声心跳，都是你努力生长的证明</span>
+          <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
+            <IconTinyHeart color={t.heartIcon} size={16} />
+          </span>
         </div>
-        {entry.note && <div style={{marginTop:6,fontSize:12,color:'#888'}}>{entry.note}</div>}
+
+        <div
+          style={{
+            background: t.blockBg,
+            borderRadius: 10,
+            padding: '14px 14px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              gap: 12,
+              marginBottom: wavePoints ? 12 : 0,
+            }}
+          >
+            <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+              <div style={{ fontSize: 11, color: t.label, marginBottom: 6 }}>平均胎心率</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0 4px' }}>
+                <span style={{ fontSize: 36, fontWeight: 500, color: t.bpmLarge, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.5 }}>
+                  {bpm}
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 400, color: t.bpmLarge }}>bpm</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24, flexShrink: 0 }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 10, color: t.label, marginBottom: 6 }}>测量时间</div>
+                <div style={{ fontSize: 12, fontWeight: 400, color: t.value, fontVariantNumeric: 'tabular-nums', lineHeight: 1.35 }}>{measuredAt}</div>
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 10, color: t.label, marginBottom: 6 }}>用时</div>
+                <div style={{ fontSize: 12, fontWeight: 400, color: t.value }}>{formatHeartDuration(d)}</div>
+              </div>
+            </div>
+          </div>
+
+          {wavePoints && (
+            <div>
+              <svg width="100%" height={44} viewBox="0 0 320 44" preserveAspectRatio="none" style={{ display: 'block' }}>
+                <polyline
+                  fill="none"
+                  stroke={t.wave}
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  points={wavePoints}
+                />
+              </svg>
+            </div>
+          )}
+        </div>
+
+        {abnormal && (
+          <div style={{ marginTop: 12, marginBottom: 2, fontSize: 11, fontWeight: 400, color: t.warnText, lineHeight: 1.5 }}>
+            本次胎心率超出正常范围，可稍作休息后重新测量
+          </div>
+        )}
+
+        {entry.note && (
+          <div style={{ marginTop: abnormal ? 8 : 10, marginBottom: 4, fontSize: 12, color: '#888', lineHeight: 1.45 }}>{entry.note}</div>
+        )}
       </div>
-      <CardFoot tag="测胎心" tagColor="#185FA5" tagBg="#E6F1FB" entry={entry} />
+      <CardFoot tag="测胎心" tagColor={t.footTag} tagBg={t.footBg} tagBorder={t.footBorder} entry={entry} />
     </div>
   )
 }
@@ -363,14 +575,14 @@ function TlGutter() {
 
 function renderEntry(entry, onUpload) {
   switch (entry.subtype) {
-    case 'weight_estimate': return <WeightEstimateCard key={entry.id} entry={entry}/>
-    case 'fetal_movement':  return <FetalMovementCard key={entry.id} entry={entry}/>
-    case 'heart_rate':      return <HeartRateCard key={entry.id} entry={entry}/>
+    case 'weight_estimate': return <WeightEstimateCard entry={entry}/>
+    case 'fetal_movement':  return <FetalMovementCard entry={entry}/>
+    case 'heart_rate':      return <HeartRateCard entry={entry}/>
     case 'belly':
-    case 'ultrasound':      return <PhotoCard key={entry.id} entry={entry}/>
+    case 'ultrasound':      return <PhotoCard entry={entry}/>
     case 'found':
-    case 'heartbeat':       return <MilestoneCompletedCard key={entry.id} entry={entry}/>
-    default:                return <PhotoCard key={entry.id} entry={entry}/>
+    case 'heartbeat':       return <MilestoneCompletedCard entry={entry}/>
+    default:                return <PhotoCard entry={entry}/>
   }
 }
 
@@ -534,7 +746,9 @@ export default function FetalPage({ onTabChange }) {
                     <button onClick={()=>setShowModal(true)} style={{background:'#E8608A',color:'#fff',border:'none',borderRadius:20,padding:'8px 24px',fontSize:13,fontWeight:500,cursor:'pointer',fontFamily:'inherit'}}>上传记录</button>
                   </div>
                 )}
-                {sortedTodayEntries.map(e => renderEntry(e, ()=>setShowModal(true)))}
+                {sortedTodayEntries.map(e => (
+                  <div key={e.id}>{renderEntry(e, () => setShowModal(true))}</div>
+                ))}
               </div>
             </div>
 
@@ -555,7 +769,9 @@ export default function FetalPage({ onTabChange }) {
                     <div style={{ display: 'flex', marginBottom: 4 }}>
                       <TlGutter />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        {entries.map(e => renderEntry(e, ()=>setShowModal(true)))}
+                        {entries.map(e => (
+                          <div key={e.id}>{renderEntry(e, () => setShowModal(true))}</div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -573,7 +789,7 @@ export default function FetalPage({ onTabChange }) {
                 <div style={{flex:1,height:'0.5px',background:'#DDD'}}/>
               </div>
               {privateEntries.map(e => (
-                <div key={e.id} style={{opacity:0.6}}>{renderEntry(e,()=>setShowModal(true))}</div>
+                <div key={e.id} style={{ opacity: 0.6 }}>{renderEntry(e, () => setShowModal(true))}</div>
               ))}
             </>
           )}

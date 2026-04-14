@@ -54,8 +54,10 @@ export function deriveFetalMovementMetrics(data, entry) {
   }
 
   const totalMinutes = rows.reduce((s, r) => s + r.durationMin, 0)
+  /** 卡片顶部文案「N分钟」：当天会话次数 × 60 */
+  const headlineMinutes = rows.length * 60
 
-  return { rows, totalValid, totalMinutes }
+  return { rows, totalValid, totalMinutes, headlineMinutes }
 }
 
 export const MILESTONES = {
@@ -85,12 +87,12 @@ export const INITIAL_TIMELINE = [
     id: 'e-001',
     type: 'data',
     subtype: 'weight_estimate',
-    date: daysAgo(12),   // 4月1日
+    date: '2026-03-27',
     week: 29, day: 1,
     title: '胎儿估重',
-    data: { weight: 1120, head: 248, belly: 220, femur: 42 },
+    data: { weight: 1120, percentile: 52, bpd: 72, head: 248, belly: 220, femur: 42 },
     author: '妈妈',
-    time: '13:33',
+    time: '09:30',
   },
   {
     id: 'e-002',
@@ -143,9 +145,30 @@ export const INITIAL_TIMELINE = [
     date: daysAgo(21),
     week: 27, day: 1,
     title: '测胎心',
-    data: { bpm: 152 },
+    data: {
+      bpm: 142,
+      abnormal: false,
+      duration_minutes: 1,
+      duration_seconds: 18,
+      heart_curve: [
+        0.52, 0.48, 0.54, 0.5, 0.56, 0.51, 0.58, 0.53, 0.55, 0.5, 0.57, 0.52, 0.59, 0.49, 0.54, 0.51,
+        0.56, 0.48, 0.53, 0.55, 0.5, 0.58, 0.52, 0.57, 0.5, 0.54, 0.49, 0.56, 0.53, 0.6, 0.51, 0.55,
+        0.48, 0.53, 0.52, 0.56, 0.5, 0.54, 0.51, 0.57,
+      ],
+    },
     author: '妈妈',
     time: '09:30',
+  },
+  {
+    id: 'e-004b',
+    type: 'data',
+    subtype: 'heart_rate',
+    date: daysAgo(9),
+    week: 28, day: 2,
+    title: '测胎心',
+    data: { bpm: 89, abnormal: true, duration_minutes: 1, duration_seconds: 28 },
+    author: '妈妈',
+    time: '14:20',
   },
   // ── 第 26 周 ──
   {

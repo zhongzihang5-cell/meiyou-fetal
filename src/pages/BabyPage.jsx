@@ -1,5 +1,9 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
+import { IconBabyFootprint, IconTinyHeart } from '../components/Icons.jsx'
 import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO, formatPregnancyWeekDay, deriveFetalMovementMetrics } from '../data/timeline.js'
+import { FETAL_MOVEMENT_THEME } from '../lib/fetalCardThemes.js'
+import { buildHeartCurvePolylinePoints, formatHeartDuration, formatHeartMeasurementDateTime, getHeartRateTheme } from '../lib/heartRateCard.js'
+import { getWeightEstimateTheme, getWeightMetricsDisplay } from '../lib/weightEstimateCard.js'
 
 const TODAY_STR = new Date().toISOString().split('T')[0]
 
@@ -10,7 +14,7 @@ function formatEntryDate(dateStr) {
 }
 
 /** 与胎宝宝 tab CardFoot 一致：时间 + 标签 + 赞/评论 */
-function FetalPreCardFoot({ tag, tagColor, tagBg, entry }) {
+function FetalPreCardFoot({ tag, tagColor, tagBg, tagBorder, entry }) {
   const t = entry.time ? ` ${entry.time}` : ''
   const lock = entry.isPrivate ? '  🔒 仅自己可见' : ''
   const metaText = `${entry.author || '妈妈'}  ${formatEntryDate(entry.date)}${t}${lock}`
@@ -20,6 +24,7 @@ function FetalPreCardFoot({ tag, tagColor, tagBg, entry }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 14px 11px' }}>
         <span style={{
           fontSize: 11, fontWeight: 500, color: tagColor, background: tagBg, borderRadius: 20, padding: '3px 10px',
+          border: tagBorder ? `0.5px solid ${tagBorder}` : '0.5px solid transparent',
           cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 3,
         }}>
           {tag} <span style={{ opacity: 0.5, fontSize: 10 }}>›</span>
@@ -127,14 +132,38 @@ function FetalDataCardSmall({ entry }) {
   let footTag = entry.title || '记录'
   let footColor = '#8A6FD8'
   let footBg = '#F0EDFB'
-  if (isWeight) { footTag = '胎儿估重'; footColor = '#E05070'; footBg = '#FFE8EE' }
-  else if (isMovement) { footTag = '数胎动'; footColor = '#B84868'; footBg = '#F8ECEF' }
-  else if (isHeartRate) { footTag = '测胎心'; footColor = '#185FA5'; footBg = '#E6F1FB' }
+  let footBorder = undefined
+  let cardBorder = '#EBEBEB'
+
+  if (isWeight) {
+    const wt = getWeightEstimateTheme()
+    footTag = '胎儿估重'
+    footColor = wt.footTag
+    footBg = wt.footBg
+    footBorder = wt.footBorder
+    cardBorder = wt.border
+  }
+  else if (isMovement) {
+    const tm = FETAL_MOVEMENT_THEME
+    footTag = '数胎动'
+    footColor = tm.footTag
+    footBg = tm.footBg
+    footBorder = tm.footBorder
+    cardBorder = tm.border
+  }
+  else if (isHeartRate) {
+    const ht = getHeartRateTheme(entry.data?.abnormal === true)
+    footTag = '测胎心'
+    footColor = ht.footTag
+    footBg = ht.footBg
+    footBorder = ht.footBorder
+    cardBorder = ht.border
+  }
   else if (isPhoto) { footTag = isBelly ? '大肚照' : '产检报告'; footColor = isBelly ? '#508040' : '#308878'; footBg = isBelly ? '#E8F4E0' : '#E0F4F0' }
   else if (isMilestone) { footTag = '大事记'; footColor = '#D04060'; footBg = '#FFE0E8' }
 
   return (
-    <div style={{ background: '#fff', borderRadius: 14, border: '0.5px solid #EBEBEB', marginBottom: 10, opacity: 0.9, overflow: 'hidden' }}>
+    <div style={{ background: '#fff', borderRadius: 14, border: `0.5px solid ${cardBorder}`, marginBottom: 10, opacity: 0.9, overflow: 'hidden' }}>
       <div style={{ padding: '10px 14px 0' }}>
         {!isMilestone && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
@@ -142,44 +171,132 @@ function FetalDataCardSmall({ entry }) {
           </div>
         )}
 
-        {isWeight && entry.data && (
-          <div style={{ display: 'flex', gap: 12, paddingBottom: 4 }}>
-            {[{ k: 'weight', u: 'g', l: '体重' }, { k: 'head', u: 'mm', l: '头围' }, { k: 'belly', u: 'mm', l: '腹围' }]
-              .filter(f => entry.data[f.k])
-              .map(f => (
-                <div key={f.k} style={{ textAlign: 'center' }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>{entry.data[f.k]}</span>
-                  <span style={{ fontSize: 10, color: '#AAA', marginLeft: 2 }}>{f.u}</span>
-                  <div style={{ fontSize: 10, color: '#AAA' }}>{f.l}</div>
+        {isWeight && entry.data && (() => {
+          const d = entry.data
+          const weight = Number(d.weight)
+          const weightStr = Number.isFinite(weight) ? String(Math.round(weight)) : '—'
+          const pct = Number(d.percentile)
+          const pctStr = Number.isFinite(pct) ? `P${Math.round(pct)}` : '—'
+          const t = getWeightEstimateTheme()
+          const metrics = getWeightMetricsDisplay(d)
+          return (
+            <div style={{ marginBottom: 4 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'baseline',
+                  gap: '0 4px',
+                  width: '100%',
+                  textAlign: 'left',
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: t.headline,
+                  lineHeight: 1.45,
+                  marginBottom: 12,
+                }}
+              >
+                <span>宝宝又长大了一点点</span>
+                <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', flexShrink: 0 }} role="img" aria-label="宝宝脚印">
+                  <IconBabyFootprint color={t.footprint} size={14} />
+                </span>
+              </div>
+              <div style={{ background: t.blockBg, borderRadius: 10, padding: '10px 10px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 10, color: t.label, marginBottom: 4 }}>估计体重</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0 2px' }}>
+                      <span style={{ fontSize: 24, fontWeight: 700, color: t.numStrong, fontVariantNumeric: 'tabular-nums', lineHeight: 1.08 }}>
+                        {weightStr}
+                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: t.numStrong }}>g</span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 0 }}>
+                    <div style={{ fontSize: 9, color: t.label, marginBottom: 4 }}>百分位</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: t.numStrong, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2, marginBottom: 3 }}>
+                      {pctStr}
+                    </div>
+                    <div style={{ fontSize: 9, fontWeight: 400, color: t.pctSub, lineHeight: 1.35 }}>正常 P10–P90</div>
+                  </div>
                 </div>
-              ))}
-          </div>
-        )}
+                <div style={{ height: '0.5px', background: t.divider, margin: '8px -10px' }} />
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    flexWrap: 'nowrap',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                    width: '100%',
+                  }}
+                >
+                  {metrics.map(m => (
+                    <div key={m.key} style={{ minWidth: 0, flex: '1 1 0', textAlign: 'center' }}>
+                      <div style={{ fontSize: 8, color: t.label, marginBottom: 3, lineHeight: 1.2 }}>{m.label}</div>
+                      <div style={{ fontSize: 10, fontWeight: 500, color: t.numStrong, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                        {m.value != null ? (
+                          <>
+                            {m.value}
+                            <span style={{ fontWeight: 400, color: t.unitMm }}> mm</span>
+                          </>
+                        ) : (
+                          <>
+                            —
+                            <span style={{ fontWeight: 400, color: t.unitMm }}> mm</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
         {isWeight && entry.note && (
           <div style={{ fontSize: 12, color: '#888', borderTop: '0.5px solid #F2F2F2', paddingTop: 8, marginBottom: 4 }}>{entry.note}</div>
         )}
 
         {isMovement && entry.data && (() => {
           const d = entry.data
-          const primary = '#B84868'
-          const blockBg = '#FFFBFC'
-          const divider = '#F3EAED'
-          const secondary = '#7A626E'
-          const assist = '#8B757E'
-          const body = '#2E2C2D'
-          const { rows, totalValid, totalMinutes } = deriveFetalMovementMetrics(d, entry)
-          const minutesRounded = Math.round(totalMinutes)
+          const tm = FETAL_MOVEMENT_THEME
+          const primary = tm.primary
+          const blockBg = tm.blockBg
+          const divider = tm.divider
+          const secondary = tm.secondary
+          const assist = tm.assist
+          const { rows, totalValid } = deriveFetalMovementMetrics(d, entry)
           const totalDisplay = Number.isFinite(totalValid) ? totalValid : '--'
           return (
             <div style={{ marginBottom: 4 }}>
-              <div style={{ textAlign: 'left', marginBottom: 8 }}>
-                <div style={{ fontSize: 12, fontWeight: 400, color: body, lineHeight: 1.5 }}>
-                  <span style={{ color: primary, fontWeight: 700 }}>{minutesRounded}分钟</span>
-                  里，你放下整个世界
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 6,
+                  width: '100%',
+                  marginBottom: 12,
+                }}
+              >
+                <div
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: 0,
+                    textAlign: 'left',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: primary,
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <div>你动一下，我数一下</div>
+                  <div style={{ marginTop: 2, textAlign: 'right', color: tm.titleSecondLine }}>——这是我们的小暗号</div>
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 400, color: body, lineHeight: 1.5, marginTop: 3 }}>
-                  等一个不确定什么时候会来的轻踢
-                </div>
+                <span style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center' }} role="img" aria-label="宝宝脚印">
+                  <IconBabyFootprint color={tm.footprint} size={14} />
+                </span>
               </div>
               <div
                 style={{
@@ -217,7 +334,7 @@ function FetalDataCardSmall({ entry }) {
                     >
                       <span style={{ fontSize: 11, color: assist, fontVariantNumeric: 'tabular-nums' }}>{row.time}</span>
                       <span style={{ fontSize: 11, color: assist, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{row.clicks}</span>
-                      <span style={{ fontSize: 11, fontWeight: 400, color: primary, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: primary, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
                         {Number.isFinite(row.valid) ? row.valid : '--'}
                       </span>
                     </div>
@@ -252,14 +369,82 @@ function FetalDataCardSmall({ entry }) {
           )
         })()}
 
-        {isHeartRate && entry.data && (
-          <div style={{ textAlign: 'center', paddingBottom: 4 }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: '#1A1A1A', letterSpacing: -0.5 }}>{entry.data.bpm}</div>
-            <div style={{ fontSize: 10, color: '#AAA' }}>次 / 分钟</div>
-            <div style={{ fontSize: 10, color: '#AAA', marginTop: 2 }}>胎心率</div>
-            {entry.note && <div style={{ fontSize: 12, color: '#888', marginTop: 8, marginBottom: 4 }}>{entry.note}</div>}
-          </div>
-        )}
+        {isHeartRate && entry.data && (() => {
+          const d = entry.data
+          const bpm = Number(d.bpm) || 0
+          const abnormal = d.abnormal === true
+          const t = getHeartRateTheme(abnormal)
+          const wavePoints = buildHeartCurvePolylinePoints(Array.isArray(d.heart_curve) ? d.heart_curve : null, 280, 36)
+          const measuredAt = formatHeartMeasurementDateTime(entry)
+          return (
+            <div style={{ marginBottom: 4 }}>
+              <div style={{ padding: '0 0 0' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'baseline',
+                    gap: '0 4px',
+                    width: '100%',
+                    textAlign: 'left',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: t.headline,
+                    lineHeight: 1.45,
+                    marginBottom: 12,
+                  }}
+                >
+                  <span>每一声心跳，都是你努力生长的证明</span>
+                  <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
+                    <IconTinyHeart color={t.heartIcon} size={14} />
+                  </span>
+                </div>
+                <div style={{ background: t.blockBg, borderRadius: 10, padding: '10px 10px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      marginBottom: wavePoints ? 8 : 0,
+                    }}
+                  >
+                    <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+                      <div style={{ fontSize: 10, color: t.label, marginBottom: 4 }}>平均胎心率</div>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 26, fontWeight: 500, color: t.bpmLarge, fontVariantNumeric: 'tabular-nums' }}>{bpm}</span>
+                        <span style={{ fontSize: 11, color: t.bpmLarge }}>bpm</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16, flexShrink: 0 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 9, color: t.label, marginBottom: 4 }}>测量时间</div>
+                        <div style={{ fontSize: 11, fontWeight: 400, color: t.value, fontVariantNumeric: 'tabular-nums', lineHeight: 1.35 }}>{measuredAt}</div>
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 9, color: t.label, marginBottom: 4 }}>用时</div>
+                        <div style={{ fontSize: 11, fontWeight: 400, color: t.value }}>{formatHeartDuration(d)}</div>
+                      </div>
+                    </div>
+                  </div>
+                  {wavePoints && (
+                    <div>
+                      <svg width="100%" height={36} viewBox="0 0 280 36" preserveAspectRatio="none" style={{ display: 'block' }}>
+                        <polyline fill="none" stroke={t.wave} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" points={wavePoints} />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                {abnormal && (
+                  <div style={{ marginTop: 8, marginBottom: 4, fontSize: 10, fontWeight: 400, color: t.warnText, lineHeight: 1.45 }}>
+                    本次胎心率超出正常范围，可稍作休息后重新测量
+                  </div>
+                )}
+                {entry.note && <div style={{ marginTop: 6, marginBottom: 4, fontSize: 11, color: '#888' }}>{entry.note}</div>}
+              </div>
+            </div>
+          )
+        })()}
 
         {isPhoto && (
           <div style={{ height: 60, background: entry.color || '#E8E8E8', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
@@ -286,7 +471,7 @@ function FetalDataCardSmall({ entry }) {
           </>
         )}
       </div>
-      <FetalPreCardFoot tag={footTag} tagColor={footColor} tagBg={footBg} entry={entry} />
+      <FetalPreCardFoot tag={footTag} tagColor={footColor} tagBg={footBg} tagBorder={footBorder} entry={entry} />
     </div>
   )
 }
@@ -469,7 +654,9 @@ export default function BabyPage({ onTabChange }) {
                   <span style={{ fontSize: 13, fontWeight: 500, color: '#AAA' }}>{dateLabel}</span>
                   <span style={{ fontSize: 11, color: '#CCC' }}>{wLabel}</span>
                 </div>
-                {entries.map(e => <FetalDataCardSmall key={e.id} entry={e} />)}
+                {entries.map(e => (
+                  <FetalDataCardSmall key={e.id} entry={e} />
+                ))}
               </div>
             )
           })}

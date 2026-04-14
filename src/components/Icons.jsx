@@ -122,3 +122,32 @@ export function IconFetalAvatar() {
     </svg>
   )
 }
+
+/** 数胎动卡片右上角：宝宝脚印（大脚掌 + 五趾横向） */
+export function IconBabyFootprint({ color = '#E295A8', size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden>
+      <ellipse cx="7" cy="4" rx="2.2" ry="2.8" fill={color} />
+      <ellipse cx="13" cy="2.8" rx="2" ry="2.5" fill={color} />
+      <ellipse cx="19" cy="3.2" rx="1.8" ry="2.3" fill={color} />
+      <ellipse cx="24.5" cy="5" rx="1.6" ry="2" fill={color} />
+      <ellipse cx="28" cy="8.5" rx="1.4" ry="1.8" fill={color} />
+      <path
+        d="M5 14 C4 11 5 9 8 8.5 C12 8 18 8 22 9.5 C26 11 27.5 14 27 18 C26.5 22 24 26 20 28 C16 30 11 29.5 8 27 C5 24.5 5.5 20 5 17 Z"
+        fill={color}
+      />
+    </svg>
+  )
+}
+
+/** 测胎心卡片右上角：小爱心 */
+export function IconTinyHeart({ color = '#B84868', size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+        fill={color}
+      />
+    </svg>
+  )
+}
