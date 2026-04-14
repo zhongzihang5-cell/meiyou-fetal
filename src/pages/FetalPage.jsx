@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import UploadModal from '../components/UploadModal.jsx'
 import { IconCamera, IconFetalAvatar } from '../components/Icons.jsx'
-import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY, formatPregnancyWeekDay } from '../data/timeline.js'
+import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY, formatPregnancyWeekDay, deriveFetalMovementMetrics } from '../data/timeline.js'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
@@ -40,7 +40,7 @@ function CardFoot({ tag, tagColor, tagBg, entry }) {
   const metaText = `${entry.author || '妈妈'}  ${formatDate(entry.date)}${t}${lock}`
   return (
     <div style={{borderTop:'0.5px solid #F2F2F2',marginTop:8}}>
-      <div style={{padding:'5px 14px 2px',fontSize:11,color:'#C0B0A8'}}>{metaText}</div>
+      <div style={{padding:'5px 14px 2px',fontSize:12,color:'#C0B0A8'}}>{metaText}</div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'5px 14px 11px'}}>
         <span style={{fontSize:11,fontWeight:500,color:tagColor,background:tagBg,borderRadius:20,padding:'3px 10px',cursor:'pointer',display:'inline-flex',alignItems:'center',gap:3}}>
           {tag} <span style={{opacity:0.5,fontSize:10}}>›</span>
@@ -102,23 +102,135 @@ function WeightEstimateCard({ entry }) {
 
 function FetalMovementCard({ entry }) {
   const { data } = entry
+  const primary = '#B84868'
+  const blockBg = '#FFFBFC'
+  const divider = '#F3EAED'
+  const secondary = '#7A626E'
+  const assist = '#8B757E'
+  const body = '#2E2C2D'
+
+  const { rows, totalValid, totalMinutes } = deriveFetalMovementMetrics(data, entry)
+  const minutesRounded = Math.round(totalMinutes)
+  const totalDisplay = Number.isFinite(totalValid) ? totalValid : '--'
+
   return (
-    <div style={{background:'#fff',borderRadius:16,border:'0.5px solid #EBEBEB',marginBottom:12,overflow:'hidden'}}>
-      <div style={{padding:'13px 14px 0'}}>
-        <div style={{display:'flex'}}>
-          <div style={{flex:1,textAlign:'center'}}>
-            <div style={{fontSize:26,fontWeight:700,color:'#1A1A1A'}}>{data?.count??'--'}</div>
-            <div style={{fontSize:10,color:'#AAA'}}>次</div>
-            <div style={{fontSize:10,color:'#AAA',marginTop:2}}>胎动次数</div>
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 16,
+        border: '0.5px solid #EBEBEB',
+        marginBottom: 12,
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ padding: '14px 14px 12px' }}>
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ fontSize: 14, fontWeight: 400, color: body, lineHeight: 1.6 }}>
+            <span style={{ color: primary, fontWeight: 700 }}>{minutesRounded}分钟</span>
+            里，你放下整个世界
           </div>
-          <div style={{flex:1,textAlign:'center',borderLeft:'0.5px solid #F2F2F2'}}>
-            <div style={{fontSize:26,fontWeight:700,color:'#1A1A1A'}}>{data?.duration??'--'}</div>
-            <div style={{fontSize:10,color:'#AAA'}}>分钟</div>
-            <div style={{fontSize:10,color:'#AAA',marginTop:2}}>计数时长</div>
+          <div style={{ fontSize: 14, fontWeight: 400, color: body, lineHeight: 1.6, marginTop: 4 }}>
+            等一个不确定什么时候会来的轻踢
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 14,
+            background: blockBg,
+            borderRadius: 12,
+            padding: '12px 14px 14px',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr)',
+              alignItems: 'center',
+              columnGap: 8,
+              paddingBottom: 8,
+            }}
+          >
+            <span style={{ fontSize: 12, color: secondary, fontWeight: 400 }}>开始时间</span>
+            <span style={{ fontSize: 12, color: secondary, fontWeight: 400, textAlign: 'center' }}>实际点击</span>
+            <span style={{ fontSize: 12, color: secondary, fontWeight: 400, textAlign: 'center' }}>有效次数</span>
+          </div>
+          <div style={{ height: '0.5px', background: divider, margin: '0 -14px 0' }} />
+
+          {rows.map((row, i) => (
+            <div key={i}>
+              {i > 0 && (
+                <div style={{ height: '0.5px', background: divider, margin: '0 -14px' }} />
+              )}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr)',
+                  alignItems: 'center',
+                  columnGap: 8,
+                  padding: '11px 0',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: assist,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {row.time}
+                </span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: assist,
+                    textAlign: 'center',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {row.clicks}
+                </span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 400,
+                    color: primary,
+                    textAlign: 'center',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {Number.isFinite(row.valid) ? row.valid : '--'}
+                </span>
+              </div>
+            </div>
+          ))}
+
+          <div style={{ height: '0.5px', background: divider, margin: '0 -14px 10px' }} />
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr)',
+              alignItems: 'start',
+              columnGap: 8,
+            }}
+          >
+            <span style={{ fontSize: 12, color: secondary, textAlign: 'left' }}>12小时胎动数</span>
+            <span aria-hidden style={{ display: 'block' }} />
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: primary,
+                textAlign: 'center',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {totalDisplay}次
+            </span>
           </div>
         </div>
       </div>
-      <CardFoot tag="数胎动" tagColor="#308878" tagBg="#E0F4F0" entry={entry} />
+      <CardFoot tag="数胎动" tagColor={primary} tagBg="#F8ECEF" entry={entry} />
     </div>
   )
 }
@@ -167,22 +279,6 @@ function PhotoCard({ entry }) {
             </svg>
           </div>
         )}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 8,
-            left: 12,
-            background: '#fff',
-            borderRadius: 20,
-            padding: '4px 11px',
-            fontSize: 10,
-            color: '#607090',
-            fontWeight: 500,
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-          }}
-        >
-          {formatPregnancyWeekDay(entry.week, entry.day)} · {tag}
-        </div>
         {entry.isNew && <div style={{position:'absolute',top:8,right:8,background:'rgba(232,96,138,0.9)',color:'#fff',fontSize:10,fontWeight:600,borderRadius:6,padding:'2px 7px'}}>新上传</div>}
       </div>
       {entry.note && <div style={{padding:'10px 14px 0',fontSize:13,fontWeight:500,color:'#1A1A1A',lineHeight:1.5}}>{entry.note}</div>}
@@ -204,22 +300,6 @@ function MilestoneCompletedCard({ entry }) {
           position: 'relative',
         }}
       >
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 8,
-            left: 12,
-            background: '#fff',
-            borderRadius: 20,
-            padding: '4px 11px',
-            fontSize: 10,
-            color: '#607090',
-            fontWeight: 500,
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-          }}
-        >
-          {formatPregnancyWeekDay(entry.week, entry.day)} · 大事记
-        </div>
         {entry.isNew && (
           <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(232,96,138,0.9)', color: '#fff', fontSize: 10, fontWeight: 600, borderRadius: 6, padding: '2px 7px' }}>新上传</div>
         )}
@@ -246,7 +326,7 @@ function TlDot({ muted }) {
         width: 8,
         height: 8,
         borderRadius: '50%',
-        background: muted ? '#CCC' : '#FF4D8D',
+        background: muted ? '#CCC' : '#E295A8',
         flexShrink: 0,
         position: 'relative',
         zIndex: 1,

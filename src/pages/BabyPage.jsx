@@ -1,5 +1,5 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
-import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO, formatPregnancyWeekDay } from '../data/timeline.js'
+import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO, formatPregnancyWeekDay, deriveFetalMovementMetrics } from '../data/timeline.js'
 
 const TODAY_STR = new Date().toISOString().split('T')[0]
 
@@ -16,7 +16,7 @@ function FetalPreCardFoot({ tag, tagColor, tagBg, entry }) {
   const metaText = `${entry.author || '妈妈'}  ${formatEntryDate(entry.date)}${t}${lock}`
   return (
     <div style={{ borderTop: '0.5px solid #F2F2F2', marginTop: 8 }}>
-      <div style={{ padding: '5px 14px 2px', fontSize: 11, color: '#C0B0A8' }}>{metaText}</div>
+      <div style={{ padding: '5px 14px 2px', fontSize: 12, color: '#C0B0A8' }}>{metaText}</div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 14px 11px' }}>
         <span style={{
           fontSize: 11, fontWeight: 500, color: tagColor, background: tagBg, borderRadius: 20, padding: '3px 10px',
@@ -128,7 +128,7 @@ function FetalDataCardSmall({ entry }) {
   let footColor = '#8A6FD8'
   let footBg = '#F0EDFB'
   if (isWeight) { footTag = '胎儿估重'; footColor = '#E05070'; footBg = '#FFE8EE' }
-  else if (isMovement) { footTag = '数胎动'; footColor = '#308878'; footBg = '#E0F4F0' }
+  else if (isMovement) { footTag = '数胎动'; footColor = '#B84868'; footBg = '#F8ECEF' }
   else if (isHeartRate) { footTag = '测胎心'; footColor = '#185FA5'; footBg = '#E6F1FB' }
   else if (isPhoto) { footTag = isBelly ? '大肚照' : '产检报告'; footColor = isBelly ? '#508040' : '#308878'; footBg = isBelly ? '#E8F4E0' : '#E0F4F0' }
   else if (isMilestone) { footTag = '大事记'; footColor = '#D04060'; footBg = '#FFE0E8' }
@@ -159,20 +159,98 @@ function FetalDataCardSmall({ entry }) {
           <div style={{ fontSize: 12, color: '#888', borderTop: '0.5px solid #F2F2F2', paddingTop: 8, marginBottom: 4 }}>{entry.note}</div>
         )}
 
-        {isMovement && entry.data && (
-          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-            <div style={{ flex: 1, textAlign: 'center', borderRight: '0.5px solid #F2F2F2', paddingRight: 12, marginRight: 4 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>{entry.data.count}</div>
-              <div style={{ fontSize: 10, color: '#AAA' }}>次</div>
-              <div style={{ fontSize: 10, color: '#AAA', marginTop: 2 }}>胎动次数</div>
+        {isMovement && entry.data && (() => {
+          const d = entry.data
+          const primary = '#B84868'
+          const blockBg = '#FFFBFC'
+          const divider = '#F3EAED'
+          const secondary = '#7A626E'
+          const assist = '#8B757E'
+          const body = '#2E2C2D'
+          const { rows, totalValid, totalMinutes } = deriveFetalMovementMetrics(d, entry)
+          const minutesRounded = Math.round(totalMinutes)
+          const totalDisplay = Number.isFinite(totalValid) ? totalValid : '--'
+          return (
+            <div style={{ marginBottom: 4 }}>
+              <div style={{ textAlign: 'left', marginBottom: 8 }}>
+                <div style={{ fontSize: 12, fontWeight: 400, color: body, lineHeight: 1.5 }}>
+                  <span style={{ color: primary, fontWeight: 700 }}>{minutesRounded}分钟</span>
+                  里，你放下整个世界
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 400, color: body, lineHeight: 1.5, marginTop: 3 }}>
+                  等一个不确定什么时候会来的轻踢
+                </div>
+              </div>
+              <div
+                style={{
+                  background: blockBg,
+                  borderRadius: 10,
+                  padding: '8px 10px 10px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr)',
+                    alignItems: 'center',
+                    columnGap: 6,
+                    paddingBottom: 6,
+                  }}
+                >
+                  <span style={{ fontSize: 10, color: secondary }}>开始时间</span>
+                  <span style={{ fontSize: 10, color: secondary, textAlign: 'center' }}>实际点击</span>
+                  <span style={{ fontSize: 10, color: secondary, textAlign: 'center' }}>有效次数</span>
+                </div>
+                <div style={{ height: '0.5px', background: divider, margin: '0 -10px 0' }} />
+
+                {rows.map((row, i) => (
+                  <div key={i}>
+                    {i > 0 && <div style={{ height: '0.5px', background: divider, margin: '0 -10px' }} />}
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr)',
+                        alignItems: 'center',
+                        columnGap: 6,
+                        padding: '7px 0',
+                      }}
+                    >
+                      <span style={{ fontSize: 11, color: assist, fontVariantNumeric: 'tabular-nums' }}>{row.time}</span>
+                      <span style={{ fontSize: 11, color: assist, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{row.clicks}</span>
+                      <span style={{ fontSize: 11, fontWeight: 400, color: primary, textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
+                        {Number.isFinite(row.valid) ? row.valid : '--'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+
+                <div style={{ height: '0.5px', background: divider, margin: '0 -10px 6px' }} />
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr)',
+                    alignItems: 'start',
+                    columnGap: 6,
+                  }}
+                >
+                  <span style={{ fontSize: 10, color: secondary, textAlign: 'left' }}>12小时胎动数</span>
+                  <span aria-hidden style={{ display: 'block' }} />
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: primary,
+                      textAlign: 'center',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {totalDisplay}次
+                  </span>
+                </div>
+              </div>
             </div>
-            <div style={{ flex: 1, textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>{entry.data.duration}</div>
-              <div style={{ fontSize: 10, color: '#AAA' }}>分钟</div>
-              <div style={{ fontSize: 10, color: '#AAA', marginTop: 2 }}>计数时长</div>
-            </div>
-          </div>
-        )}
+          )
+        })()}
 
         {isHeartRate && entry.data && (
           <div style={{ textAlign: 'center', paddingBottom: 4 }}>
@@ -202,24 +280,7 @@ function FetalDataCardSmall({ entry }) {
                   ? `#E8E8E8 url(${entry.imageUrl}) center/cover no-repeat`
                   : (entry.color || '#DDC8D8'),
               }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 5,
-                  left: 8,
-                  background: '#fff',
-                  borderRadius: 12,
-                  padding: '2px 8px',
-                  fontSize: 9,
-                  color: '#607090',
-                  fontWeight: 500,
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                }}
-              >
-                {formatPregnancyWeekDay(entry.week, entry.day)} · 大事记
-              </div>
-            </div>
+            />
             {entry.title && <div style={{ fontSize: 13, fontWeight: 700, color: '#2A1020', marginBottom: 3 }}>{entry.title}</div>}
             {entry.note && <div style={{ fontSize: 11, color: '#9A8090', lineHeight: 1.55 }}>{entry.note}</div>}
           </>
@@ -235,8 +296,8 @@ function TlDot({ muted, small }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
-      background: muted ? '#CCC' : '#E8608A',
-      boxShadow: muted ? 'none' : `0 0 0 ${small ? 2 : 3}px rgba(232,96,138,0.18)`,
+      background: muted ? '#CCC' : '#E295A8',
+      boxShadow: muted ? 'none' : `0 0 0 ${small ? 2 : 3}px rgba(226,149,168,0.22)`,
     }} />
   )
 }

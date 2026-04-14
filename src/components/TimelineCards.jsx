@@ -223,22 +223,7 @@ export function MilestoneCompletedCard({ entry }) {
           ? `#E8E8E8 url(${entry.imageUrl}) center/cover no-repeat`
           : heroBg,
         position: 'relative',
-      }}>
-        <div style={{
-          position: 'absolute',
-          bottom: 8,
-          left: 12,
-          background: '#fff',
-          borderRadius: 20,
-          padding: '4px 11px',
-          fontSize: 10,
-          color: '#607090',
-          fontWeight: 500,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-        }}>
-          {formatPregnancyWeekDay(entry.week, entry.day)} · 大事记
-        </div>
-      </div>
+      }} />
       {entry.title && (
         <div style={{ padding: '10px 14px 0', fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>{entry.title}</div>
       )}

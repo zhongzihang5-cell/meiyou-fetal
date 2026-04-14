@@ -5,6 +5,59 @@ export function formatPregnancyWeekDay(week, day) {
   return `孕${week}周${d}天`
 }
 
+const MOVEMENT_CLICK_DEFAULTS = [10, 22, 30]
+
+/**
+ * 数胎动卡片：从后端字段 valid_count / total_count / duration_minutes 推导展示数据；
+ * 兼容旧字段 count、actualClicks、duration、twelveHourTotal。
+ */
+export function deriveFetalMovementMetrics(data, entry) {
+  const raw =
+    Array.isArray(data?.sessions) && data.sessions.length > 0
+      ? data.sessions
+      : [
+          {
+            time: entry?.time || '--:--',
+            count: data?.count,
+            valid_count: data?.valid_count,
+            total_count: data?.total_count,
+            duration_minutes: data?.duration_minutes,
+          },
+        ]
+
+  const defaultMin = Number(data?.duration ?? data?.default_session_minutes ?? 60)
+  const defaultMinSafe = Number.isFinite(defaultMin) && defaultMin > 0 ? defaultMin : 60
+
+  const rows = raw.map((row, i) => {
+    let valid = row.valid_count != null ? Number(row.valid_count) : NaN
+    if (!Number.isFinite(valid) && row.count != null) valid = Number(row.count)
+    const validFinal = Number.isFinite(valid) ? valid : NaN
+
+    let clicks = row.total_count != null ? Number(row.total_count) : NaN
+    if (!Number.isFinite(clicks) && row.actualClicks != null) clicks = Number(row.actualClicks)
+    if (!Number.isFinite(clicks)) clicks = MOVEMENT_CLICK_DEFAULTS[i % MOVEMENT_CLICK_DEFAULTS.length]
+
+    let durationMin = row.duration_minutes != null ? Number(row.duration_minutes) : NaN
+    if (!Number.isFinite(durationMin)) durationMin = defaultMinSafe
+
+    return {
+      time: row.time || '--:--',
+      valid: validFinal,
+      clicks,
+      durationMin,
+    }
+  })
+
+  let totalValid = data?.twelveHourTotal != null ? Number(data.twelveHourTotal) : NaN
+  if (!Number.isFinite(totalValid)) {
+    totalValid = rows.reduce((s, r) => s + (Number.isFinite(r.valid) ? r.valid : 0), 0)
+  }
+
+  const totalMinutes = rows.reduce((s, r) => s + r.durationMin, 0)
+
+  return { rows, totalValid, totalMinutes }
+}
+
 export const MILESTONES = {
   1:  { title: '记录第一次发现宝宝存在', sub: '验孕棒、早早孕试纸，留下这珍贵的一刻', emoji: '🌱' },
   8:  { title: '第一次听到心跳', sub: '拍下产检报告，留住这个珍贵瞬间', emoji: '💓' },
@@ -70,7 +123,16 @@ export const INITIAL_TIMELINE = [
     date: daysAgo(18),
     week: 27, day: 4,
     title: '数胎动',
-    data: { count: 12, duration: 60, session: '晚' },
+    data: {
+      sessions: [
+        { time: '08:12', valid_count: 8, total_count: 22, duration_minutes: 60 },
+        { time: '12:34', valid_count: 11, total_count: 23, duration_minutes: 60 },
+        { time: '22:34', valid_count: 12, total_count: 23, duration_minutes: 60 },
+      ],
+      count: 12,
+      duration: 60,
+      session: '晚',
+    },
     author: '妈妈',
     time: '21:10',
   },
