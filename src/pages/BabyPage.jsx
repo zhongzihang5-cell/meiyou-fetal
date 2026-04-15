@@ -1,4 +1,5 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
+import { Weight } from 'lucide-react'
 import { IconBabyFootprint, IconTinyHeart } from '../components/Icons.jsx'
 import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO, formatPregnancyWeekDay, deriveFetalMovementMetrics } from '../data/timeline.js'
 import { FETAL_MOVEMENT_THEME } from '../lib/fetalCardThemes.js'
@@ -197,8 +198,8 @@ function FetalDataCardSmall({ entry }) {
                 }}
               >
                 <span>宝宝又长大了一点点</span>
-                <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', flexShrink: 0 }} role="img" aria-label="宝宝脚印">
-                  <IconBabyFootprint color={t.footprint} size={14} />
+                <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', flexShrink: 0 }} role="img" aria-label="估重">
+                  <Weight size={14} color={t.footprint} strokeWidth={2} aria-hidden />
                 </span>
               </div>
               <div style={{ background: t.blockBg, borderRadius: 10, padding: '10px 10px' }}>
@@ -341,27 +342,32 @@ function FetalDataCardSmall({ entry }) {
                   </div>
                 ))}
 
-                <div style={{ height: '0.5px', background: divider, margin: '0 -10px 6px' }} />
+                <div style={{ height: '0.5px', background: divider, margin: '0 -10px 0' }} />
                 <div
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.95fr)',
-                    alignItems: 'start',
-                    columnGap: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 8,
+                    marginTop: 6,
+                    padding: '6px 8px',
+                    borderRadius: 8,
+                    background: tm.summaryPillBg,
                   }}
                 >
-                  <span style={{ fontSize: 10, color: secondary, textAlign: 'left' }}>12小时胎动数</span>
-                  <span aria-hidden style={{ display: 'block' }} />
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: primary,
-                      textAlign: 'center',
-                      fontVariantNumeric: 'tabular-nums',
-                    }}
-                  >
-                    {totalDisplay}次
+                  <span style={{ fontSize: 10, color: tm.summaryLabelMuted, fontWeight: 400, flexShrink: 0 }}>12小时胎动数</span>
+                  <span style={{ textAlign: 'right', minWidth: 0, lineHeight: 1.2 }}>
+                    <span
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: tm.summaryNumberStrong,
+                        fontVariantNumeric: 'tabular-nums',
+                      }}
+                    >
+                      {totalDisplay}
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 400, color: tm.secondary }}>次</span>
                   </span>
                 </div>
               </div>

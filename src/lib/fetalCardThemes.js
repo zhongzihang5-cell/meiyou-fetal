@@ -13,6 +13,10 @@ export const FETAL_MOVEMENT_THEME = {
   footBg: '#F3EEF8',
   footBorder: '#DDD0E8',
   footprint: '#A68BB5',
+  /** 12 小时汇总条：极浅紫底（约 5%），作表格收尾而非独立强调块 */
+  summaryPillBg: 'rgba(122, 84, 144, 0.05)',
+  summaryLabelMuted: '#888888',
+  summaryNumberStrong: '#7A5490',
 }
 
 /** 测胎心玫瑰粉 / 数胎动藕紫 / 胎儿估重莫兰迪绿；其余默认玫瑰粉圆点 */
