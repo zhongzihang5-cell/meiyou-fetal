@@ -637,7 +637,7 @@ export default function FetalPage({ onTabChange }) {
             position: 'relative',
             minHeight: 176,
             backgroundColor: '#D8C4BC',
-            backgroundImage: 'url(/fetal-header-bg.png)',
+            backgroundImage: `url(${import.meta.env.BASE_URL}fetal-header-bg.png)`,
             backgroundSize: 'cover',
             backgroundPosition: 'center 28%',
           }}>

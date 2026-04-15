@@ -535,7 +535,7 @@ export default function BabyPage({ onTabChange }) {
             position: 'relative',
             minHeight: 176,
             backgroundColor: '#E8E4E0',
-            backgroundImage: 'url(/baby-header-bg.png)',
+            backgroundImage: `url(${import.meta.env.BASE_URL}baby-header-bg.png)`,
             backgroundSize: 'cover',
             backgroundPosition: 'center 32%',
           }}>
