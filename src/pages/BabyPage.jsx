@@ -14,15 +14,14 @@ function formatEntryDate(dateStr) {
   return `${d.getMonth() + 1} 月 ${d.getDate()} 日`
 }
 
-/** 与胎宝宝 tab CardFoot 一致：时间 + 标签 + 赞/评论 */
+/** 与胎宝宝 tab CardFoot 一致：仅标签行；妈妈行与赞/评论同一行 */
 function FetalPreCardFoot({ tag, tagColor, tagBg, tagBorder, entry }) {
   const t = entry.time ? ` ${entry.time}` : ''
   const lock = entry.isPrivate ? '  🔒 仅自己可见' : ''
   const metaText = `${entry.author || '妈妈'}  ${formatEntryDate(entry.date)}${t}${lock}`
   return (
-    <div style={{ borderTop: '0.5px solid #F2F2F2', marginTop: 8 }}>
-      <div style={{ padding: '5px 14px 2px', fontSize: 12, color: '#C0B0A8' }}>{metaText}</div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 14px 11px' }}>
+    <div style={{ marginTop: 8, paddingTop: 8 }}>
+      <div style={{ padding: '0 14px 8px' }}>
         <span style={{
           fontSize: 11, fontWeight: 500, color: tagColor, background: tagBg, borderRadius: 20, padding: '3px 10px',
           border: tagBorder ? `0.5px solid ${tagBorder}` : '0.5px solid transparent',
@@ -30,13 +29,24 @@ function FetalPreCardFoot({ tag, tagColor, tagBg, tagBorder, entry }) {
         }}>
           {tag} <span style={{ opacity: 0.5, fontSize: 10 }}>›</span>
         </span>
-        <div style={{ display: 'flex', gap: 14 }}>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          padding: '2px 14px 11px',
+        }}
+      >
+        <div style={{ fontSize: 12, color: '#C0B0A8', flex: 1, minWidth: 0, lineHeight: 1.45 }}>{metaText}</div>
+        <div style={{ display: 'flex', gap: 14, flexShrink: 0, alignItems: 'center' }}>
           <span style={{ fontSize: 12, color: '#C0B0A8', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
             赞
           </span>
           <span style={{ fontSize: 12, color: '#C0B0A8', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21 15C21 16.1 20.1 17 19 17H7L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21 15C21 16.1 20.1 17 19 17H7L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
             评论
           </span>
         </div>
@@ -45,9 +55,11 @@ function FetalPreCardFoot({ tag, tagColor, tagBg, tagBorder, entry }) {
   )
 }
 
-// ── 出生卡片 ──
+// ── 出生卡片 ──（底部与胎宝宝估重卡标签样式一致：仅「身高体重」药丸 + 时间行）
 function BirthCard() {
   const b = BIRTH_INFO
+  const wt = getWeightEstimateTheme()
+  const birthMeta = `妈妈  ${formatEntryDate(b.date)}`
   return (
     <div style={{ background: '#fff', borderRadius: 18, border: '0.5px solid #EBEBEB', overflow: 'hidden', marginBottom: 14 }}>
       <div style={{ background: 'linear-gradient(135deg, #FFE4E8, #FFC8D0)', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -65,16 +77,35 @@ function BirthCard() {
           </div>
         ))}
       </div>
-      <div style={{ padding: '0 14px 12px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {[b.date, '身高体重', '出生记录'].map(t => (
-          <div key={t} style={{ fontSize: 11, background: '#F5F5F7', color: '#666', borderRadius: 8, padding: '4px 10px' }}>{t}</div>
-        ))}
-      </div>
-      <div style={{ padding: '10px 14px', borderTop: '0.5px solid #F2F2F2', display: 'flex', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 12, color: '#AAA' }}>妈妈</span>
-        <div style={{ display: 'flex', gap: 14 }}>
-          <span style={{ fontSize: 12, color: '#AAA', cursor: 'pointer' }}>❤️ 赞</span>
-          <span style={{ fontSize: 12, color: '#AAA', cursor: 'pointer' }}>💬 评论</span>
+      <div style={{ marginTop: 0, paddingTop: 8 }}>
+        <div style={{ padding: '0 14px 8px' }}>
+          <span style={{
+            fontSize: 11, fontWeight: 500, color: wt.footTag, background: wt.footBg, borderRadius: 20, padding: '3px 10px',
+            border: `0.5px solid ${wt.footBorder}`, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 3,
+          }}>
+            身高体重 <span style={{ opacity: 0.5, fontSize: 10 }}>›</span>
+          </span>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            padding: '2px 14px 11px',
+          }}
+        >
+          <div style={{ fontSize: 12, color: '#C0B0A8', flex: 1, minWidth: 0, lineHeight: 1.45 }}>{birthMeta}</div>
+          <div style={{ display: 'flex', gap: 14, flexShrink: 0, alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: '#C0B0A8', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              赞
+            </span>
+            <span style={{ fontSize: 12, color: '#C0B0A8', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21 15C21 16.1 20.1 17 19 17H7L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              评论
+            </span>
+          </div>
         </div>
       </div>
     </div>

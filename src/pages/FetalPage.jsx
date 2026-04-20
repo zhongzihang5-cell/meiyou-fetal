@@ -43,23 +43,33 @@ function CardFoot({ tag, tagColor, tagBg, tagBorder, entry }) {
   const lock = entry.isPrivate ? '  🔒 仅自己可见' : ''
   const metaText = `${entry.author || '妈妈'}  ${formatDate(entry.date)}${t}${lock}`
   return (
-    <div style={{borderTop:'0.5px solid #F2F2F2',marginTop:8}}>
-      <div style={{padding:'5px 14px 2px',fontSize:12,color:'#C0B0A8'}}>{metaText}</div>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'5px 14px 11px'}}>
+    <div style={{ marginTop: 8, paddingTop: 8 }}>
+      <div style={{ padding: '0 14px 8px' }}>
         <span style={{
-          fontSize:11,fontWeight:500,color:tagColor,background:tagBg,borderRadius:20,padding:'3px 10px',
+          fontSize: 11, fontWeight: 500, color: tagColor, background: tagBg, borderRadius: 20, padding: '3px 10px',
           border: tagBorder ? `0.5px solid ${tagBorder}` : '0.5px solid transparent',
-          cursor:'pointer',display:'inline-flex',alignItems:'center',gap:3,
+          cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 3,
         }}>
-          {tag} <span style={{opacity:0.5,fontSize:10}}>›</span>
+          {tag} <span style={{ opacity: 0.5, fontSize: 10 }}>›</span>
         </span>
-        <div style={{display:'flex',gap:14}}>
-          <span style={{fontSize:12,color:'#C0B0A8',display:'flex',alignItems:'center',gap:4,cursor:'pointer'}}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          padding: '2px 14px 11px',
+        }}
+      >
+        <div style={{ fontSize: 12, color: '#C0B0A8', flex: 1, minWidth: 0, lineHeight: 1.45 }}>{metaText}</div>
+        <div style={{ display: 'flex', gap: 14, flexShrink: 0, alignItems: 'center' }}>
+          <span style={{ fontSize: 12, color: '#C0B0A8', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
             赞
           </span>
-          <span style={{fontSize:12,color:'#C0B0A8',display:'flex',alignItems:'center',gap:4,cursor:'pointer'}}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21 15C21 16.1 20.1 17 19 17H7L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <span style={{ fontSize: 12, color: '#C0B0A8', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21 15C21 16.1 20.1 17 19 17H7L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
             评论
           </span>
         </div>
@@ -806,7 +816,7 @@ export default function FetalPage({ onTabChange }) {
         <button className="fab" onClick={()=>setShowModal(true)}><IconCamera/></button>
       </div>
 
-      <BottomNav active="record" onTabChange={onTabChange}/>
+      <BottomNav active="home" onTabChange={onTabChange}/>
       {showModal && <UploadModal onClose={()=>setShowModal(false)} onSubmit={e=>{setTimeline(prev=>[e,...prev]);setShowModal(false)}}/>}
     </div>
   )
