@@ -670,33 +670,73 @@ export default function BabyPage({ onTabChange }) {
           </div>
           <BirthCard />
 
-          {/* ── 分割线：出生前数据 ── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '8px 0 18px' }}>
-            <div style={{ flex: 1, height: '0.5px', background: '#DDD' }} />
-            <span style={{ fontSize: 11, color: '#AAA', whiteSpace: 'nowrap' }}>以下为出生前记录</span>
-            <span style={{ fontSize: 11, color: '#E8608A', cursor: 'pointer', whiteSpace: 'nowrap' }}>仅妈妈可见 · 设置</span>
-            <div style={{ flex: 1, height: '0.5px', background: '#DDD' }} />
-          </div>
+          {/* ── 出生前记录：隐私说明 + 时间轴（与产品稿一致） ── */}
+          <div style={{ marginTop: 12, marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ flex: 1, height: '0.5px', background: '#E5E5E5' }} />
+              <span style={{ fontSize: 12, color: '#999', padding: '0 10px', whiteSpace: 'nowrap', lineHeight: 1.4 }}>
+                — 以下内容仅对部分亲友可见 —
+              </span>
+              <div style={{ flex: 1, height: '0.5px', background: '#E5E5E5' }} />
+            </div>
+            <div style={{ textAlign: 'center', marginBottom: 18 }}>
+              <span
+                role="button"
+                tabIndex={0}
+                style={{ fontSize: 13, color: '#3A8DDD', cursor: 'pointer' }}
+                onClick={e => e.preventDefault()}
+              >
+                前往设置
+              </span>
+            </div>
 
-          {/* 胎宝宝历史记录（精简版卡片） */}
-          {fetalDates.map(([date, entries]) => {
-            const first = entries[0]
-            const d = new Date(date)
-            const dateLabel = `${d.getMonth() + 1} 月 ${d.getDate()} 日`
-            const wLabel = formatPregnancyWeekDay(first.week, first.day)
-            return (
-              <div key={date} style={{ opacity: 0.75 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <TlDot muted small />
-                  <span style={{ fontSize: 13, fontWeight: 500, color: '#AAA' }}>{dateLabel}</span>
-                  <span style={{ fontSize: 11, color: '#CCC' }}>{wLabel}</span>
-                </div>
-                {entries.map(e => (
-                  <FetalDataCardSmall key={e.id} entry={e} />
-                ))}
-              </div>
-            )
-          })}
+            {/* 左侧竖线 + 粉点 + 日期与孕周同一行 */}
+            <div style={{ position: 'relative', paddingLeft: 22, marginLeft: 2 }}>
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  left: 7,
+                  top: 10,
+                  bottom: 0,
+                  width: 2,
+                  background: '#E3E5EA',
+                  borderRadius: 1,
+                }}
+              />
+              {fetalDates.map(([date, entries]) => {
+                const first = entries[0]
+                const d = new Date(date)
+                const dateLabel = `${d.getMonth() + 1}月${d.getDate()}日`
+                const wLabel = formatPregnancyWeekDay(first.week, first.day)
+                return (
+                  <div key={date} style={{ position: 'relative', marginBottom: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, minHeight: 22 }}>
+                      <div
+                        aria-hidden
+                        style={{
+                          position: 'absolute',
+                          left: -17,
+                          top: 3,
+                          width: 10,
+                          height: 10,
+                          borderRadius: '50%',
+                          background: '#E295A8',
+                          boxShadow: '0 0 0 3px rgba(226,149,168,0.22)',
+                          zIndex: 1,
+                        }}
+                      />
+                      <span style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>{dateLabel}</span>
+                      <span style={{ fontSize: 14, fontWeight: 500, color: '#333' }}>{wLabel}</span>
+                    </div>
+                    {entries.map(e => (
+                      <FetalDataCardSmall key={e.id} entry={e} />
+                    ))}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
 
           <div style={{ height: 40 }} />
         </div>
