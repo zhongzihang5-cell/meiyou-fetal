@@ -6,7 +6,7 @@ import { IconBabyFootprint, IconCamera, IconFetalAvatar, IconTinyHeart } from '.
 import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY, formatPregnancyWeekDay, deriveFetalMovementMetrics } from '../data/timeline.js'
 import { FETAL_MOVEMENT_THEME } from '../lib/fetalCardThemes.js'
 import { buildHeartCurvePolylinePoints, formatHeartDuration, formatHeartMeasurementDateTime, getHeartRateTheme } from '../lib/heartRateCard.js'
-import { getWeightEstimateTheme, getWeightMetricsDisplay } from '../lib/weightEstimateCard.js'
+import { formatFetalWeightGramsToJin, getWeightEstimateTheme, getWeightMetricsDisplay } from '../lib/weightEstimateCard.js'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
@@ -98,7 +98,8 @@ function TodayGuideCard({ entry, onUpload }) {
 function WeightEstimateCard({ entry }) {
   const data = entry.data || {}
   const weight = Number(data.weight)
-  const weightStr = Number.isFinite(weight) ? String(Math.round(weight)) : '—'
+  const weightJin = formatFetalWeightGramsToJin(weight)
+  const weightStr = weightJin != null ? weightJin : '—'
   const pct = Number(data.percentile)
   const pctStr = Number.isFinite(pct) ? `P${Math.round(pct)}` : '—'
   const t = getWeightEstimateTheme()
@@ -146,7 +147,7 @@ function WeightEstimateCard({ entry }) {
             }}
           >
             <div style={{ minWidth: 0, flex: '1 1 auto' }}>
-              <div style={{ fontSize: 11, color: t.label, marginBottom: 6 }}>估计体重</div>
+              <div style={{ fontSize: 11, color: t.label, marginBottom: 6 }}>估重</div>
               <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0 2px' }}>
                 <span
                   style={{
@@ -160,7 +161,7 @@ function WeightEstimateCard({ entry }) {
                 >
                   {weightStr}
                 </span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: t.numStrong }}>g</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: t.numStrong }}>斤</span>
               </div>
             </div>
             <div style={{ flexShrink: 0, textAlign: 'right', minWidth: 0 }}>

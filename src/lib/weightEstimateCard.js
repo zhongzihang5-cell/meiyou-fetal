@@ -1,5 +1,16 @@
 /** 胎儿估重卡片：莫兰迪绿主题与字段解析 */
 
+/** 克 → 市斤（500g = 1斤），展示如 6.95 */
+export function formatFetalWeightGramsToJin(grams) {
+  const g = Number(grams)
+  if (!Number.isFinite(g) || g <= 0) return null
+  const jin = g / 500
+  return jin
+    .toFixed(2)
+    .replace(/0+$/, '')
+    .replace(/\.$/, '')
+}
+
 export function getWeightEstimateTheme() {
   return {
     border: '#C0D8CE',

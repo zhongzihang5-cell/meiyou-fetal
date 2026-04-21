@@ -4,7 +4,7 @@ import { IconBabyFootprint, IconTinyHeart } from '../components/Icons.jsx'
 import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO, formatPregnancyWeekDay, deriveFetalMovementMetrics } from '../data/timeline.js'
 import { FETAL_MOVEMENT_THEME } from '../lib/fetalCardThemes.js'
 import { buildHeartCurvePolylinePoints, formatHeartDuration, formatHeartMeasurementDateTime, getHeartRateTheme } from '../lib/heartRateCard.js'
-import { getWeightEstimateTheme, getWeightMetricsDisplay } from '../lib/weightEstimateCard.js'
+import { formatFetalWeightGramsToJin, getWeightEstimateTheme, getWeightMetricsDisplay } from '../lib/weightEstimateCard.js'
 
 const TODAY_STR = new Date().toISOString().split('T')[0]
 
@@ -206,7 +206,8 @@ function FetalDataCardSmall({ entry }) {
         {isWeight && entry.data && (() => {
           const d = entry.data
           const weight = Number(d.weight)
-          const weightStr = Number.isFinite(weight) ? String(Math.round(weight)) : '—'
+          const weightJin = formatFetalWeightGramsToJin(weight)
+          const weightStr = weightJin != null ? weightJin : '—'
           const pct = Number(d.percentile)
           const pctStr = Number.isFinite(pct) ? `P${Math.round(pct)}` : '—'
           const t = getWeightEstimateTheme()
@@ -236,12 +237,12 @@ function FetalDataCardSmall({ entry }) {
               <div style={{ background: t.blockBg, borderRadius: 10, padding: '10px 10px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8 }}>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 10, color: t.label, marginBottom: 4 }}>估计体重</div>
+                    <div style={{ fontSize: 10, color: t.label, marginBottom: 4 }}>估重</div>
                     <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0 2px' }}>
                       <span style={{ fontSize: 24, fontWeight: 700, color: t.numStrong, fontVariantNumeric: 'tabular-nums', lineHeight: 1.08 }}>
                         {weightStr}
                       </span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: t.numStrong }}>g</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: t.numStrong }}>斤</span>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 0 }}>
