@@ -1,5 +1,5 @@
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
-import { Weight } from 'lucide-react'
+import { SquarePen, Weight } from 'lucide-react'
 import { IconBabyFootprint, IconTinyHeart } from '../components/Icons.jsx'
 import { BABY_TIMELINE_AFTER, INITIAL_TIMELINE, BIRTH_INFO, formatPregnancyWeekDay, deriveFetalMovementMetrics } from '../data/timeline.js'
 import { FETAL_MOVEMENT_THEME } from '../lib/fetalCardThemes.js'
@@ -593,7 +593,26 @@ export default function BabyPage({ onTabChange }) {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 17, fontWeight: 600, color: '#fff', textShadow: '0 1px 8px rgba(0,0,0,0.35)' }}>{b.name}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.88)', marginTop: 3, textShadow: '0 1px 6px rgba(0,0,0,0.35)' }}>{heroAgeLabel}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 3 }}>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.88)', textShadow: '0 1px 6px rgba(0,0,0,0.35)' }}>{heroAgeLabel}</span>
+                    <button
+                      type="button"
+                      aria-label="编辑宝宝年龄"
+                      onClick={e => e.preventDefault()}
+                      style={{
+                        padding: 0,
+                        border: 'none',
+                        background: 'none',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        lineHeight: 0,
+                        opacity: 0.95,
+                      }}
+                    >
+                      <SquarePen size={13} color="rgba(255,255,255,0.95)" strokeWidth={1.75} aria-hidden />
+                    </button>
+                  </div>
                 </div>
                 <div style={{
                   fontSize: 12, color: '#fff', borderRadius: 20, padding: '7px 12px',

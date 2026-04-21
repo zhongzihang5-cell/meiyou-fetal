@@ -101,6 +101,7 @@ export const INITIAL_TIMELINE = [
     date: daysAgo(12),   // 4月1日
     week: 29, day: 1,
     title: '产检报告',
+    note: '各项指标正常，宝宝发育得很好～',
     author: '妈妈',
     color: '#C8D8E8',
     time: '15:20',
@@ -188,7 +189,7 @@ export const INITIAL_TIMELINE = [
     id: 'e-006',
     type: 'milestone',
     subtype: 'heartbeat',
-    date: daysAgo(140),
+    date: '2025-12-02',
     week: 8, day: 1,
     title: '第一次听到心跳',
     note: '168次/分钟，好快！眼泪都出来了',

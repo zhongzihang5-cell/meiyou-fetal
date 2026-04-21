@@ -1,20 +1,23 @@
 import { useState, useMemo } from 'react'
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import UploadModal from '../components/UploadModal.jsx'
-import { Weight } from 'lucide-react'
+import FetalBabyInfoPage from './FetalBabyInfoPage.jsx'
+import FetalBabyPersonalCenterPage from './FetalBabyPersonalCenterPage.jsx'
+import PhotoRecordDetailPage from './PhotoRecordDetailPage.jsx'
+import MilestoneTagTimelinePage from './MilestoneTagTimelinePage.jsx'
+import FetalMonitorDetailPage from './FetalMonitorDetailPage.jsx'
+import WeightEstimateDetailPage from './WeightEstimateDetailPage.jsx'
+import PhotoEntryFullDetailPage from './PhotoEntryFullDetailPage.jsx'
+import { MilestoneCompletedCard } from '../components/MilestoneCompletedCard.jsx'
+import { CardFoot } from '../components/FetalPhotoCardParts.jsx'
+import { FetalTimelinePhotoCard as PhotoCard } from '../components/FetalTimelinePhotoCard.jsx'
+import { TODAY, formatDate } from '../lib/fetalFormat.js'
+import { SquarePen, Weight } from 'lucide-react'
 import { IconBabyFootprint, IconCamera, IconFetalAvatar, IconTinyHeart } from '../components/Icons.jsx'
 import { INITIAL_TIMELINE, MILESTONES, CURRENT_WEEK, CURRENT_DAY, formatPregnancyWeekDay, deriveFetalMovementMetrics } from '../data/timeline.js'
 import { FETAL_MOVEMENT_THEME } from '../lib/fetalCardThemes.js'
 import { buildHeartCurvePolylinePoints, formatHeartDuration, formatHeartMeasurementDateTime, getHeartRateTheme } from '../lib/heartRateCard.js'
 import { formatFetalWeightGramsToJin, getWeightEstimateTheme, getWeightMetricsDisplay } from '../lib/weightEstimateCard.js'
-
-const TODAY = new Date().toISOString().split('T')[0]
-
-function formatDate(dateStr) {
-  if (dateStr === TODAY) return '今天'
-  const d = new Date(dateStr)
-  return `${d.getMonth() + 1} 月 ${d.getDate()} 日`
-}
 
 function weekLabel(entry) {
   return formatPregnancyWeekDay(entry.week, entry.day)
@@ -38,46 +41,6 @@ function groupByWeekThenDate(entries) {
 
 const MILESTONE_EMOJIS = {1:'🌱',8:'💓',12:'📋',16:'🤲',22:'🔬',28:'📸',29:'📸',30:'📸',36:'⏰'}
 
-function CardFoot({ tag, tagColor, tagBg, tagBorder, entry }) {
-  const t = entry.time ? ` ${entry.time}` : ''
-  const lock = entry.isPrivate ? '  🔒 仅自己可见' : ''
-  const metaText = `${entry.author || '妈妈'}  ${formatDate(entry.date)}${t}${lock}`
-  return (
-    <div style={{ marginTop: 8, paddingTop: 8 }}>
-      <div style={{ padding: '0 14px 8px' }}>
-        <span style={{
-          fontSize: 11, fontWeight: 500, color: tagColor, background: tagBg, borderRadius: 20, padding: '3px 10px',
-          border: tagBorder ? `0.5px solid ${tagBorder}` : '0.5px solid transparent',
-          cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 3,
-        }}>
-          {tag} <span style={{ opacity: 0.5, fontSize: 10 }}>›</span>
-        </span>
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          padding: '2px 14px 11px',
-        }}
-      >
-        <div style={{ fontSize: 12, color: '#C0B0A8', flex: 1, minWidth: 0, lineHeight: 1.45 }}>{metaText}</div>
-        <div style={{ display: 'flex', gap: 14, flexShrink: 0, alignItems: 'center' }}>
-          <span style={{ fontSize: 12, color: '#C0B0A8', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            赞
-          </span>
-          <span style={{ fontSize: 12, color: '#C0B0A8', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21 15C21 16.1 20.1 17 19 17H7L3 21V5C3 3.9 3.9 3 5 3H19C20.1 3 21 3.9 21 5V15Z" stroke="#C0B0A8" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            评论
-          </span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function TodayGuideCard({ entry, onUpload }) {
   return (
     <div style={{background:'#fff',borderRadius:18,border:'1px solid #F4C0D1',marginBottom:14,overflow:'hidden'}}>
@@ -95,7 +58,7 @@ function TodayGuideCard({ entry, onUpload }) {
   )
 }
 
-function WeightEstimateCard({ entry }) {
+function WeightEstimateCard({ entry, onTagClick, onContentClick }) {
   const data = entry.data || {}
   const weight = Number(data.weight)
   const weightJin = formatFetalWeightGramsToJin(weight)
@@ -105,17 +68,8 @@ function WeightEstimateCard({ entry }) {
   const t = getWeightEstimateTheme()
   const metrics = getWeightMetricsDisplay(data)
 
-  return (
-    <div
-      style={{
-        background: '#fff',
-        borderRadius: 16,
-        border: `0.5px solid ${t.border}`,
-        marginBottom: 12,
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{ padding: '14px 14px 0' }}>
+  const main = (
+    <div style={{ padding: '14px 14px 0' }}>
         <div
           style={{
             display: 'flex',
@@ -210,13 +164,43 @@ function WeightEstimateCard({ entry }) {
         {entry.note && (
           <div style={{ marginTop: 10, marginBottom: 4, fontSize: 12, color: '#888', lineHeight: 1.45 }}>{entry.note}</div>
         )}
-      </div>
-      <CardFoot tag="胎儿估重" tagColor={t.footTag} tagBg={t.footBg} tagBorder={t.footBorder} entry={entry} />
+    </div>
+  )
+
+  return (
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 16,
+        border: `0.5px solid ${t.border}`,
+        marginBottom: 12,
+        overflow: 'hidden',
+      }}
+    >
+      {onContentClick ? (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => onContentClick()}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              onContentClick()
+            }
+          }}
+          style={{ cursor: 'pointer', outline: 'none' }}
+        >
+          {main}
+        </div>
+      ) : (
+        main
+      )}
+      <CardFoot tag="胎儿估重" tagColor={t.footTag} tagBg={t.footBg} tagBorder={t.footBorder} entry={entry} onTagClick={onTagClick} />
     </div>
   )
 }
 
-function FetalMovementCard({ entry }) {
+function FetalMovementCard({ entry, onTagClick, onContentClick }) {
   const { data } = entry
   const tm = FETAL_MOVEMENT_THEME
   const primary = tm.primary
@@ -228,17 +212,8 @@ function FetalMovementCard({ entry }) {
   const { rows, totalValid } = deriveFetalMovementMetrics(data, entry)
   const totalDisplay = Number.isFinite(totalValid) ? totalValid : '--'
 
-  return (
-    <div
-      style={{
-        background: '#fff',
-        borderRadius: 16,
-        border: `0.5px solid ${tm.border}`,
-        marginBottom: 12,
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{ padding: '14px 14px 0' }}>
+  const main = (
+    <div style={{ padding: '14px 14px 0' }}>
         <div
           style={{
             display: 'flex',
@@ -366,14 +341,43 @@ function FetalMovementCard({ entry }) {
             </span>
           </div>
         </div>
-      </div>
+    </div>
+  )
 
-      <CardFoot tag="数胎动" tagColor={tm.footTag} tagBg={tm.footBg} tagBorder={tm.footBorder} entry={entry} />
+  return (
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 16,
+        border: `0.5px solid ${tm.border}`,
+        marginBottom: 12,
+        overflow: 'hidden',
+      }}
+    >
+      {onContentClick ? (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => onContentClick()}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              onContentClick()
+            }
+          }}
+          style={{ cursor: 'pointer', outline: 'none' }}
+        >
+          {main}
+        </div>
+      ) : (
+        main
+      )}
+      <CardFoot tag="数胎动" tagColor={tm.footTag} tagBg={tm.footBg} tagBorder={tm.footBorder} entry={entry} onTagClick={onTagClick} />
     </div>
   )
 }
 
-function HeartRateCard({ entry }) {
+function HeartRateCard({ entry, onTagClick, onContentClick }) {
   const d = entry.data || {}
   const bpm = Number(d.bpm) || 0
   const abnormal = d.abnormal === true
@@ -381,17 +385,8 @@ function HeartRateCard({ entry }) {
   const wavePoints = buildHeartCurvePolylinePoints(Array.isArray(d.heart_curve) ? d.heart_curve : null, 320, 44)
   const measuredAt = formatHeartMeasurementDateTime(entry)
 
-  return (
-    <div
-      style={{
-        background: '#fff',
-        borderRadius: 16,
-        border: `0.5px solid ${t.border}`,
-        marginBottom: 12,
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{ padding: '14px 14px 0' }}>
+  const main = (
+    <div style={{ padding: '14px 14px 0' }}>
         <div
           style={{
             display: 'flex',
@@ -475,71 +470,38 @@ function HeartRateCard({ entry }) {
         {entry.note && (
           <div style={{ marginTop: abnormal ? 8 : 10, marginBottom: 4, fontSize: 12, color: '#888', lineHeight: 1.45 }}>{entry.note}</div>
         )}
-      </div>
-      <CardFoot tag="测胎心" tagColor={t.footTag} tagBg={t.footBg} tagBorder={t.footBorder} entry={entry} />
     </div>
   )
-}
 
-function PhotoCard({ entry }) {
-  const isBelly = entry.subtype === 'belly'
-  const tag = isBelly ? '大肚照' : '产检报告'
-  const tagColor = isBelly ? '#508040' : '#308878'
-  const tagBg = isBelly ? '#E8F4E0' : '#E0F4F0'
   return (
-    <div style={{background:'#fff',borderRadius:16,border:'0.5px solid #EBEBEB',overflow:'hidden',marginBottom:12}}>
-      <div
-        style={{
-          height: 130,
-          background: entry.imageUrl
-            ? `#E8E8E8 url(${entry.imageUrl}) center/cover no-repeat`
-            : (entry.color || '#E8E8E8'),
-          position: 'relative',
-        }}
-      >
-        {!entry.imageUrl && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" opacity="0.3">
-              {isBelly ? (
-                <><ellipse cx="20" cy="18" rx="10" ry="12" fill="#fff" /><ellipse cx="20" cy="32" rx="14" ry="10" fill="#fff" /></>
-              ) : (
-                <><rect x="4" y="6" width="32" height="26" rx="3" fill="#fff" /><path d="M8 24 L13 18 L18 22 L24 14 L32 20" stroke="#DDD" strokeWidth="2" fill="none" strokeLinecap="round" /></>
-              )}
-            </svg>
-          </div>
-        )}
-        {entry.isNew && <div style={{position:'absolute',top:8,right:8,background:'rgba(232,96,138,0.9)',color:'#fff',fontSize:10,fontWeight:600,borderRadius:6,padding:'2px 7px'}}>新上传</div>}
-      </div>
-      {entry.note && <div style={{padding:'10px 14px 0',fontSize:13,fontWeight:500,color:'#1A1A1A',lineHeight:1.5}}>{entry.note}</div>}
-      <CardFoot tag={tag} tagColor={tagColor} tagBg={tagBg} entry={entry} />
-    </div>
-  )
-}
-
-function MilestoneCompletedCard({ entry }) {
-  const heroBg = entry.color || '#DDC8D8'
-  return (
-    <div style={{ background: '#fff', borderRadius: 16, border: '0.5px solid #EBEBEB', overflow: 'hidden', marginBottom: 12 }}>
-      <div
-        style={{
-          height: 130,
-          background: entry.imageUrl
-            ? `#E8E8E8 url(${entry.imageUrl}) center/cover no-repeat`
-            : heroBg,
-          position: 'relative',
-        }}
-      >
-        {entry.isNew && (
-          <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(232,96,138,0.9)', color: '#fff', fontSize: 10, fontWeight: 600, borderRadius: 6, padding: '2px 7px' }}>新上传</div>
-        )}
-      </div>
-      {entry.title && (
-        <div style={{ padding: '10px 14px 0', fontSize: 14, fontWeight: 600, color: '#1A1A1A', lineHeight: 1.45 }}>{entry.title}</div>
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 16,
+        border: `0.5px solid ${t.border}`,
+        marginBottom: 12,
+        overflow: 'hidden',
+      }}
+    >
+      {onContentClick ? (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => onContentClick()}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              onContentClick()
+            }
+          }}
+          style={{ cursor: 'pointer', outline: 'none' }}
+        >
+          {main}
+        </div>
+      ) : (
+        main
       )}
-      {entry.note && (
-        <div style={{ padding: entry.title ? '6px 14px 0' : '10px 14px 0', fontSize: 13, color: '#666', lineHeight: 1.5 }}>{entry.note}</div>
-      )}
-      <CardFoot tag="大事记" tagColor="#D04060" tagBg="#FFE0E8" entry={entry} />
+      <CardFoot tag="测胎心" tagColor={t.footTag} tagBg={t.footBg} tagBorder={t.footBorder} entry={entry} onTagClick={onTagClick} />
     </div>
   )
 }
@@ -590,22 +552,58 @@ function TlGutter() {
   return <div style={{ width: TL_GUTTER, flexShrink: 0 }} />
 }
 
-function renderEntry(entry, onUpload) {
+function renderEntry(entry, onUpload, onOpenPhotoDetail, onOpenMilestoneTag, onDataTagNavigate, onOpenPhotoFullDetail) {
+  const openPhotoDetail =
+    (entry.subtype === 'belly' || entry.subtype === 'ultrasound') && onOpenPhotoDetail
+      ? () => onOpenPhotoDetail(entry)
+      : undefined
+  const openPhotoFull =
+    (entry.subtype === 'belly' || entry.subtype === 'ultrasound') && onOpenPhotoFullDetail
+      ? () => onOpenPhotoFullDetail(entry)
+      : undefined
+  const openMilestoneWhite =
+    (entry.subtype === 'found' || entry.subtype === 'heartbeat') && onOpenPhotoFullDetail
+      ? () => onOpenPhotoFullDetail(entry)
+      : undefined
+  const openMilestoneTag = onOpenMilestoneTag ? () => onOpenMilestoneTag() : undefined
+  const openWeight = onDataTagNavigate ? () => onDataTagNavigate('weight') : undefined
+  const openMovement = onDataTagNavigate ? () => onDataTagNavigate('movement') : undefined
+  const openHeart = onDataTagNavigate ? () => onDataTagNavigate('heart') : undefined
   switch (entry.subtype) {
-    case 'weight_estimate': return <WeightEstimateCard entry={entry}/>
-    case 'fetal_movement':  return <FetalMovementCard entry={entry}/>
-    case 'heart_rate':      return <HeartRateCard entry={entry}/>
+    case 'weight_estimate':
+      return <WeightEstimateCard entry={entry} onTagClick={openWeight} onContentClick={openWeight} />
+    case 'fetal_movement':
+      return <FetalMovementCard entry={entry} onTagClick={openMovement} onContentClick={openMovement} />
+    case 'heart_rate':
+      return <HeartRateCard entry={entry} onTagClick={openHeart} onContentClick={openHeart} />
     case 'belly':
-    case 'ultrasound':      return <PhotoCard entry={entry}/>
+      return <PhotoCard entry={entry} onTagClick={openPhotoDetail} onBlankClick={openPhotoFull} />
+    case 'ultrasound':
+      return <PhotoCard entry={entry} onTagClick={openPhotoDetail} onBlankClick={openPhotoFull} />
     case 'found':
-    case 'heartbeat':       return <MilestoneCompletedCard entry={entry}/>
-    default:                return <PhotoCard entry={entry}/>
+    case 'heartbeat':
+      return (
+        <MilestoneCompletedCard
+          entry={entry}
+          onTagClick={openMilestoneTag}
+          onWhiteClick={openMilestoneWhite}
+        />
+      )
+    default:                return <PhotoCard entry={entry} />
   }
 }
 
 export default function FetalPage({ onTabChange }) {
   const [timeline, setTimeline] = useState(INITIAL_TIMELINE)
   const [showModal, setShowModal] = useState(false)
+  const [showFetalInfoPage, setShowFetalInfoPage] = useState(false)
+  const [showPersonalCenter, setShowPersonalCenter] = useState(false)
+  const [photoDetailEntry, setPhotoDetailEntry] = useState(null)
+  /** 大肚照/产检报告/大事记 白色区域 → 详情页 */
+  const [fullDetailEntry, setFullDetailEntry] = useState(null)
+  const [milestoneTagOpen, setMilestoneTagOpen] = useState(false)
+  /** null | { type: 'monitor', tab: 'movement'|'heart' } | { type: 'weight' } */
+  const [fetalDataDetail, setFetalDataDetail] = useState(null)
 
   const todayEntries = timeline.filter(e => e.date === TODAY)
   const hasTodayEntry = todayEntries.length > 0
@@ -621,6 +619,78 @@ export default function FetalPage({ onTabChange }) {
       return bellyRank(a) - bellyRank(b)
     })
   }, [todayEntries])
+
+  const milestoneTagEntries = useMemo(
+    () =>
+      [...timeline]
+        .filter(e => e.type === 'milestone')
+        .sort((a, b) => b.date.localeCompare(a.date)),
+    [timeline],
+  )
+
+  const latestWeightEstimateEntry = useMemo(() => {
+    const list = timeline.filter(e => e.subtype === 'weight_estimate')
+    return list.sort((a, b) => b.date.localeCompare(a.date))[0] ?? null
+  }, [timeline])
+
+  const handleDataTagNavigate = kind => {
+    if (kind === 'weight') setFetalDataDetail({ type: 'weight' })
+    else if (kind === 'movement') setFetalDataDetail({ type: 'monitor', tab: 'movement' })
+    else if (kind === 'heart') setFetalDataDetail({ type: 'monitor', tab: 'heart' })
+  }
+
+  if (fullDetailEntry) {
+    return (
+      <PhotoEntryFullDetailPage
+        entry={fullDetailEntry}
+        onBack={() => setFullDetailEntry(null)}
+        onTagToCategory={e => {
+          setFullDetailEntry(null)
+          if (e.type === 'milestone') setMilestoneTagOpen(true)
+          else setPhotoDetailEntry(e)
+        }}
+      />
+    )
+  }
+  if (photoDetailEntry) {
+    return (
+      <PhotoRecordDetailPage
+        entry={photoDetailEntry}
+        onBack={() => setPhotoDetailEntry(null)}
+      />
+    )
+  }
+  if (milestoneTagOpen) {
+    return (
+      <MilestoneTagTimelinePage
+        entries={milestoneTagEntries}
+        onBack={() => setMilestoneTagOpen(false)}
+      />
+    )
+  }
+  if (fetalDataDetail?.type === 'monitor') {
+    return (
+      <FetalMonitorDetailPage
+        key={fetalDataDetail.tab}
+        initialTab={fetalDataDetail.tab}
+        onBack={() => setFetalDataDetail(null)}
+      />
+    )
+  }
+  if (fetalDataDetail?.type === 'weight') {
+    return (
+      <WeightEstimateDetailPage
+        entry={latestWeightEstimateEntry}
+        onBack={() => setFetalDataDetail(null)}
+      />
+    )
+  }
+  if (showPersonalCenter) {
+    return <FetalBabyPersonalCenterPage onBack={() => setShowPersonalCenter(false)} />
+  }
+  if (showFetalInfoPage) {
+    return <FetalBabyInfoPage onBack={() => setShowFetalInfoPage(false)} />
+  }
 
   return (
     <div className="phone-shell" style={{display:'flex',flexDirection:'column',height:'100%'}}>
@@ -644,14 +714,26 @@ export default function FetalPage({ onTabChange }) {
 
         {/* Header：背景图 + 底部信息条（孕程进度） */}
         <div style={{ borderBottom: '0.5px solid #F2F2F2' }}>
-          <div style={{
-            position: 'relative',
-            minHeight: 176,
-            backgroundColor: '#D8C4BC',
-            backgroundImage: `url(${import.meta.env.BASE_URL}fetal-header-bg.png)`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center 28%',
-          }}>
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setShowFetalInfoPage(true)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setShowFetalInfoPage(true)
+              }
+            }}
+            style={{
+              position: 'relative',
+              minHeight: 176,
+              backgroundColor: '#D8C4BC',
+              backgroundImage: `url(${import.meta.env.BASE_URL}fetal-header-bg.png)`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 28%',
+              cursor: 'pointer',
+            }}
+          >
             <div style={{
               position: 'absolute', inset: 0,
               background: 'linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.38) 55%, rgba(0,0,0,0.52) 100%)',
@@ -667,21 +749,60 @@ export default function FetalPage({ onTabChange }) {
                 <div style={{
                   width: 48, height: 48, borderRadius: '50%',
                   background: 'rgba(255,255,255,0.22)', border: '2px solid rgba(255,255,255,0.85)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                   backdropFilter: 'blur(4px)',
                 }}>
                   <IconFetalAvatar />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 17, fontWeight: 600, color: '#fff', textShadow: '0 1px 8px rgba(0,0,0,0.35)' }}>胎宝宝</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.88)', marginTop: 3, textShadow: '0 1px 6px rgba(0,0,0,0.35)' }}>1位亲友可见</div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      marginTop: 3,
+                      alignSelf: 'flex-start',
+                    }}
+                  >
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.88)', textShadow: '0 1px 6px rgba(0,0,0,0.35)' }}>
+                      {formatPregnancyWeekDay(CURRENT_WEEK, CURRENT_DAY)}
+                    </span>
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        lineHeight: 0,
+                        opacity: 0.95,
+                      }}
+                      aria-hidden
+                    >
+                      <SquarePen size={13} color="rgba(255,255,255,0.95)" strokeWidth={1.75} />
+                    </span>
+                  </div>
                 </div>
-                <div style={{
-                  fontSize: 12, color: '#fff', borderRadius: 20, padding: '7px 12px',
-                  background: 'rgba(0,0,0,0.38)', fontWeight: 500, cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: 4, border: '0.5px solid rgba(255,255,255,0.25)',
-                  backdropFilter: 'blur(6px)',
-                }}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={e => {
+                    e.stopPropagation()
+                    setShowPersonalCenter(true)
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setShowPersonalCenter(true)
+                    }
+                  }}
+                  style={{
+                    fontSize: 12, color: '#fff', borderRadius: 20, padding: '7px 12px',
+                    background: 'rgba(0,0,0,0.38)', fontWeight: 500, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 4, border: '0.5px solid rgba(255,255,255,0.25)',
+                    backdropFilter: 'blur(6px)',
+                    flexShrink: 0,
+                  }}
+                >
                   <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#fff" strokeWidth="1.4"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#fff" strokeWidth="1.4" strokeLinecap="round"/></svg>
                   邀请准爸爸
                 </div>
@@ -764,7 +885,7 @@ export default function FetalPage({ onTabChange }) {
                   </div>
                 )}
                 {sortedTodayEntries.map(e => (
-                  <div key={e.id}>{renderEntry(e, () => setShowModal(true))}</div>
+                  <div key={e.id}>{renderEntry(e, () => setShowModal(true), setPhotoDetailEntry, () => setMilestoneTagOpen(true), handleDataTagNavigate, setFullDetailEntry)}</div>
                 ))}
               </div>
             </div>
@@ -787,7 +908,7 @@ export default function FetalPage({ onTabChange }) {
                       <TlGutter />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {entries.map(e => (
-                          <div key={e.id}>{renderEntry(e, () => setShowModal(true))}</div>
+                          <div key={e.id}>{renderEntry(e, () => setShowModal(true), setPhotoDetailEntry, () => setMilestoneTagOpen(true), handleDataTagNavigate, setFullDetailEntry)}</div>
                         ))}
                       </div>
                     </div>
@@ -806,7 +927,7 @@ export default function FetalPage({ onTabChange }) {
                 <div style={{flex:1,height:'0.5px',background:'#DDD'}}/>
               </div>
               {privateEntries.map(e => (
-                <div key={e.id} style={{ opacity: 0.6 }}>{renderEntry(e, () => setShowModal(true))}</div>
+                <div key={e.id} style={{ opacity: 0.6 }}>{renderEntry(e, () => setShowModal(true), setPhotoDetailEntry, () => setMilestoneTagOpen(true), handleDataTagNavigate, setFullDetailEntry)}</div>
               ))}
             </>
           )}
