@@ -1,5 +1,5 @@
 import { StatusBar } from '../components/Layout.jsx'
-import { IconArrow, IconFetalAvatar } from '../components/Icons.jsx'
+import { IconArrow } from '../components/Icons.jsx'
 
 const PHONE_MIN = 820
 
@@ -75,7 +75,7 @@ function ChevronRow({ icon, label, onClick, isLast, right }) {
   )
 }
 
-/** 胎宝宝 tab → 邀请准爸爸：宝宝个人中心 */
+/** 宝宝个人中心（从亲友团顶部宝宝模块进入；返回回到亲友团） */
 export default function FetalBabyPersonalCenterPage({ onBack }) {
   return (
     <div
@@ -92,90 +92,10 @@ export default function FetalBabyPersonalCenterPage({ onBack }) {
       <BackHeader title="宝宝个人中心" onBack={onBack} />
 
       <div className="scroll-area" style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingBottom: 28 }}>
-        {/* 亲友可见 */}
-        <div
-          style={{
-            margin: '12px 12px 0',
-            background: '#fff',
-            borderRadius: 14,
-            padding: '14px 14px 16px',
-            border: '0.5px solid #EEE',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
-            <span style={{ fontSize: 14, color: '#333' }}>1位亲友可见</span>
-            <span
-              style={{
-                width: 16,
-                height: 16,
-                borderRadius: '50%',
-                border: '0.5px solid #CCC',
-                color: '#AAA',
-                fontSize: 11,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                lineHeight: 1,
-              }}
-              aria-hidden
-            >
-              i
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: '50%',
-                  background: '#F5F5F5',
-                  border: '2px solid #fff',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 6,
-                }}
-              >
-                <div style={{ transform: 'scale(1.1)' }}>
-                  <IconFetalAvatar />
-                </div>
-              </div>
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>妈妈</span>
-              <span style={{ fontSize: 11, color: '#AAA', marginTop: 4 }}>来过 14 次</span>
-              <span style={{ fontSize: 11, color: '#AAA' }}>刚刚</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: '50%',
-                  border: '1.5px dashed #F4A0B8',
-                  background: '#FFF5F8',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 6,
-                  color: '#E8608A',
-                  fontSize: 26,
-                  fontWeight: 300,
-                  lineHeight: 1,
-                }}
-              >
-                +
-              </div>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#E8608A', textAlign: 'center' }}>微信邀请准爸爸</span>
-              <span style={{ fontSize: 11, color: '#E895A8', marginTop: 4, textAlign: 'center' }}>共同记录宝宝</span>
-            </div>
-          </div>
-        </div>
-
         {/* 宝宝资料 / 二维码 / 宝宝号 */}
         <div
           style={{
-            margin: '10px 12px 0',
+            margin: '12px 12px 0',
             background: '#fff',
             borderRadius: 14,
             overflow: 'hidden',

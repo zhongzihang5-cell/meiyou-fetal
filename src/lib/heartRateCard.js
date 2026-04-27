@@ -35,7 +35,7 @@ export function getHeartRateTheme(abnormal) {
 
 /**
  * 仅用心跳数据点数组渲染折线；无数据或点数不足时返回 null（不画曲线区）。
- * 支持 number[]（0–1 或原始 bpm）、或 { y } / { value } 对象数组。
+ * 支持 number[]（窄带 0–1 或原始 bpm 等）、或 { y } / { value } 对象数组；竖向始终按 min–max 拉满以便看清起伏。
  */
 export function buildHeartCurvePolylinePoints(curve, w, h) {
   if (!Array.isArray(curve) || curve.length < 2) return null
@@ -51,20 +51,20 @@ export function buildHeartCurvePolylinePoints(curve, w, h) {
     .filter(Number.isFinite)
   if (nums.length < 2) return null
 
-  let normVals = nums
   const maxV = Math.max(...nums)
   const minV = Math.min(...nums)
-  if (maxV > 1.5 || minV < -0.5) {
-    const span = maxV - minV || 1
-    normVals = nums.map(v => (v - minV) / span)
-  } else {
-    normVals = nums.map(v => Math.min(1, Math.max(0, v)))
-  }
+  /** 始终按 min–max 拉到 0–1，避免 demo 里 0.48–0.6 这类窄带被当成「已铺满」而几乎成直线 */
+  const span = maxV - minV || 1
+  const normVals = nums.map(v => (v - minV) / span)
+
+  /** 竖向多占一些高度，接近心电图起伏感；上下各留约 8% 边距 */
+  const pad = 0.08
+  const amp = 1 - pad * 2
 
   return normVals
     .map((t, i) => {
       const x = (i / (normVals.length - 1)) * w
-      const y = h * (0.82 - t * 0.64)
+      const y = h * (1 - pad - t * amp)
       return `${x.toFixed(2)},${y.toFixed(2)}`
     })
     .join(' ')

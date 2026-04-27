@@ -1,17 +1,33 @@
 import { useState } from 'react'
 import { StatusBar } from '../components/Layout.jsx'
 import ShareActionSheet from '../components/ShareActionSheet.jsx'
-import { FetalTimelinePhotoCard } from '../components/FetalTimelinePhotoCard.jsx'
-import { MilestoneCompletedCard } from '../components/MilestoneCompletedCard.jsx'
+
+const DATA_RECORD_SHEET_ACTIONS = [
+  { label: '修改查看权限', emoji: '👥' },
+  { label: '删除', emoji: '🗑️' },
+]
+import { HeartRateCard, FetalMovementCard, WeightEstimateCard } from '../components/FetalDataTimelineCards.jsx'
 import { formatDateCompact } from '../lib/fetalFormat.js'
 import { PHONE_SHELL_MIN_HEIGHT } from '../lib/phoneShell.js'
 
+function renderDataCard(entry, onTagToTool) {
+  switch (entry.subtype) {
+    case 'weight_estimate':
+      return <WeightEstimateCard embedded entry={entry} onTagClick={onTagToTool} />
+    case 'fetal_movement':
+      return <FetalMovementCard embedded entry={entry} onTagClick={onTagToTool} />
+    case 'heart_rate':
+      return <HeartRateCard embedded entry={entry} onTagClick={onTagToTool} />
+    default:
+      return null
+  }
+}
+
 /**
- * 时间轴卡片白色区域进入：标题「详情」；照片卡与 PhotoCard 一致，大事记与 MilestoneCompletedCard 一致。
+ * 胎宝宝时间轴：胎儿估重 / 数胎动 / 测胎心 单条记录详情（顶栏与底部与大肚照「详情」一致）
  */
-export default function PhotoEntryFullDetailPage({ entry, onBack, onTagToCategory }) {
+export default function FetalDataRecordDetailPage({ entry, onBack, onTagToTool }) {
   const [sheetOpen, setSheetOpen] = useState(false)
-  const isMilestone = entry.type === 'milestone'
 
   return (
     <div
@@ -100,19 +116,7 @@ export default function PhotoEntryFullDetailPage({ entry, onBack, onTagToCategor
           <span style={{ fontSize: 14, color: '#888' }}>孕{entry.week}周</span>
         </div>
 
-        {isMilestone ? (
-          <MilestoneCompletedCard
-            embedded
-            entry={entry}
-            onTagClick={onTagToCategory ? () => onTagToCategory(entry) : undefined}
-          />
-        ) : (
-          <FetalTimelinePhotoCard
-            embedded
-            entry={entry}
-            onTagClick={onTagToCategory ? () => onTagToCategory(entry) : undefined}
-          />
-        )}
+        {renderDataCard(entry, onTagToTool)}
       </div>
 
       <div
@@ -154,7 +158,7 @@ export default function PhotoEntryFullDetailPage({ entry, onBack, onTagToCategor
         </button>
       </div>
 
-      {sheetOpen && <ShareActionSheet onClose={() => setSheetOpen(false)} />}
+      {sheetOpen && <ShareActionSheet onClose={() => setSheetOpen(false)} footerActions={DATA_RECORD_SHEET_ACTIONS} />}
     </div>
   )
 }

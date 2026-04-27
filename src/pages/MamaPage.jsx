@@ -1,18 +1,40 @@
+import { useState } from 'react'
 import { StatusBar, BottomNav } from '../components/Layout.jsx'
 import { DAYS_UNTIL_DUE } from '../data/timeline.js'
+import PregnancyPeriodPage from './PregnancyPeriodPage.jsx'
 
 export default function MamaPage({ onTabChange }) {
+  const [pregnancyHubOpen, setPregnancyHubOpen] = useState(false)
+
+  if (pregnancyHubOpen) {
+    return <PregnancyPeriodPage onBack={() => setPregnancyHubOpen(false)} />
+  }
+
   return (
     <div className="phone-shell" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <StatusBar />
 
       <div className="top-nav">
-        <div style={{ padding: '0 6px', display: 'flex', alignItems: 'center' }}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="9" cy="9" r="7" stroke="#555" strokeWidth="1.6"/>
-            <path d="M14.5 14.5L18 18" stroke="#555" strokeWidth="1.6" strokeLinecap="round"/>
+        <button
+          type="button"
+          aria-label="孕期"
+          title="孕期"
+          onClick={() => setPregnancyHubOpen(true)}
+          style={{
+            padding: '0 6px',
+            display: 'flex',
+            alignItems: 'center',
+            border: 'none',
+            background: 'none',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+            <circle cx="9" cy="9" r="7" stroke="#555" strokeWidth="1.6" />
+            <path d="M14.5 14.5L18 18" stroke="#555" strokeWidth="1.6" strokeLinecap="round" />
           </svg>
-        </div>
+        </button>
         <div className="top-nav-tabs">
           <div className="nav-tab active">妈妈</div>
           <div className="nav-tab" onClick={() => onTabChange('fetal')}>胎宝宝</div>

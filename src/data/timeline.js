@@ -160,17 +160,6 @@ export const INITIAL_TIMELINE = [
     author: '妈妈',
     time: '09:30',
   },
-  {
-    id: 'e-004b',
-    type: 'data',
-    subtype: 'heart_rate',
-    date: daysAgo(9),
-    week: 28, day: 2,
-    title: '测胎心',
-    data: { bpm: 89, abnormal: true, duration_minutes: 1, duration_seconds: 28 },
-    author: '妈妈',
-    time: '14:20',
-  },
   // ── 第 26 周 ──
   {
     id: 'e-005',
@@ -196,18 +185,6 @@ export const INITIAL_TIMELINE = [
     author: '妈妈',
     time: '10:05',
     color: '#D8C4D4',
-  },
-  {
-    id: 'e-007',
-    type: 'milestone',
-    subtype: 'found',
-    date: '2025-10-06',
-    week: 1, day: 1,
-    title: '发现宝宝存在',
-    note: '两条线，手都在抖！',
-    author: '妈妈',
-    time: '08:12',
-    color: '#DDC8D8',
   },
 ]
 
